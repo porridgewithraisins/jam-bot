@@ -2,3 +2,4 @@
 /node_modules
 todo
 yarn.lock
+/bin
