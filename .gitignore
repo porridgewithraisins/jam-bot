@@ -3,3 +3,4 @@
 todo
 yarn.lock
 /bin
+.vscode

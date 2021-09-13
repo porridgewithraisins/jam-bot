@@ -9,7 +9,7 @@ A discord music bot (in progress)
 -   [x] REPL for every command
 -   [x] Test fully on an actual server
 -   [ ] Move audio player to worker thread to avoid playback stutter while processing other commands
--   [ ] Make all commands extend a single interface, to decouple app.ts from the actual commands.
--   [ ] Support custom prefixes
+-   [x] Make all commands extend a single interface, to decouple app.ts from the actual commands.
+-   [x] Support custom prefixes
 -   [ ] Playlist support (spotify too?)
--   [ ] Duplicate Rythms !search feature
+-   [x] Duplicate Rythms !search feature
