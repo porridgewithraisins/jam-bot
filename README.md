@@ -65,3 +65,4 @@ Submit an issue in this Github repo.
 -   [x] Duplicate Rythms !search feature
 -   [ ] Playlist support (spotify too?)
 -   [ ] Move audio player to worker thread to avoid the tiny playback stutter that may occur while processing other commands
+-   [ ] Add message managing features similar to rythm's !clean to remove the bot's clutter from text channels
