@@ -137,7 +137,7 @@ class MusicPlayer {
     }
 
     private async sendMsg(text: string) {
-        this.textChannel.send(embedMessage(text));
+        if (!this.silence) this.textChannel.send(embedMessage(text));
     }
 
     async help() {
@@ -308,6 +308,7 @@ class MusicPlayer {
             this.songs.unshift(song);
             this.player.stop();
         } else {
+            this.sendMsg("Could not find song");
         }
     }
 
