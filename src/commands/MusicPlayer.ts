@@ -247,7 +247,7 @@ class MusicPlayer {
     }
 
     private idxWithinBounds(idx: number) {
-        return idx > 0 && idx < this.songs.length;
+        return idx >= 0 && idx < this.songs.length;
     }
 
     async remove(arg: string) {
@@ -294,7 +294,7 @@ class MusicPlayer {
 
     async skipto(arg: string) {
         if (!arg) return;
-        const idx = parseInt(arg);
+        const idx = parseInt(arg) - 1;
         if (idx === NaN) {
             this.invalid();
             return;
