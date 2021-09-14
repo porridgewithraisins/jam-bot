@@ -1,6 +1,6 @@
 {
     "name": "jam-bot",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "A discord music bot, which you can run locally using your own token, for servers. No configuration required, except the login token",
     "keywords": [
         "discord",
