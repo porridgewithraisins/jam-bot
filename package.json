@@ -1,6 +1,6 @@
 {
     "name": "jam-bot",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "A discord music bot, which you can run locally using your own token, for servers. No configuration required, except the login token",
     "keywords": [
         "discord",
@@ -16,9 +16,7 @@
         "url": "https://github.com/porridgewithraisins/jam-bot",
         "type": "git"
     },
-    "files": [
-        "dist"
-    ],
+    "files": ["dist/*.js", "dist/**/&.js"],
     "scripts": {
         "build": "tsc"
     },
