@@ -1,11 +1,15 @@
 {
     "name": "jam-bot",
+    "version": "1.0.0",
+    "description": "A discord music bot, which you can run locally using your own token, for servers. No configuration required, except the login token",
     "keywords": [
         "discord",
         "music",
         "bot",
         "rythm"
     ],
+    "author": "Santhanam <santhanambr2002@gmail.com>",
+    "license": "MIT",
     "homepage": "https://github.com/porridgewithraisins/jam-bot",
     "bugs": "https://github.com/porridgewithraisins/jam-bot",
     "repository": {
@@ -31,6 +35,5 @@
         "@types/yt-search": "^2.3.2",
         "ts-node": "^10.2.1",
         "typescript": "^4.4.3"
-    },
-    "license": "MIT"
+    }
 }
