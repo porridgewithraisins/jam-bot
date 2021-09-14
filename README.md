@@ -27,7 +27,6 @@ Submit an issue in this Github repo.
 -   [x] Make all commands extend a single interface, to decouple app.ts from the actual commands.
 -   [x] Support custom prefixes
 -   [x] Duplicate Rythms !search feature
--   [ ] Publish to npm
 -   [ ] Playlist support (spotify too?)
 -   [ ] Enable guilds to save playlists to use later
 -   [ ] Move audio player to worker thread to avoid the tiny playback stutter that may occur while processing other commands
