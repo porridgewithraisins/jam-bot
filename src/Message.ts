@@ -1,6 +1,6 @@
 import { MessageEmbed } from "discord.js";
-import { PREFIX } from "./Constants";
-import { Song } from "./types/Song";
+import { getConfig } from "./Config";
+import { Song } from "./types";
 
 export {
     getArg,
@@ -24,6 +24,6 @@ const embedMessage = (text: string) => {
     return { embeds: [new MessageEmbed().setDescription(text)] };
 };
 
-const prefixify = (text: string) => PREFIX + text;
+const prefixify = (text: string) => getConfig().prefix + text;
 
 const mdHyperlinkSong = (song: Song) => `[${song.title}](${song.url})`;

@@ -1,6 +1,6 @@
 import ytSearch from "yt-search";
 import ytdl, { getInfo, validateURL } from "ytdl-core";
-import { Song } from "./types/Song";
+import { Song } from "./types";
 
 export { searchSong, getSong, getStream };
 

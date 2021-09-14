@@ -7,11 +7,9 @@ import {
     joinVoiceChannel,
 } from "@discordjs/voice";
 import { TextBasedChannels } from "discord.js";
-import { MusicPlayerArgs } from "../types/MusicPlayerArgs";
-import { MusicPlayerCommandMap } from "../types/MusicPlayerCommand";
-import { Song } from "../types/Song";
 import { getSong, getStream, searchSong } from "../Songs";
 import { prefixify, mdHyperlinkSong, embedMessage, getArg } from "../Message";
+import { Song, MusicPlayerCommandMap, MusicPlayerArgs } from "../types";
 
 export { MusicPlayer };
 
@@ -228,6 +226,7 @@ class MusicPlayer {
     async pause() {
         if (this.player.state.status === AudioPlayerStatus.Playing) {
             this.player.pause();
+            this.sendMsg("Paused");
         } else {
             this.sendMsg("Nothing is playing");
         }
@@ -256,7 +255,7 @@ class MusicPlayer {
             return;
         }
         const idx = parseInt(arg) - 1;
-        if (idx === NaN) {
+        if (isNaN(idx)) {
             this.invalid();
             return;
         }
@@ -273,7 +272,7 @@ class MusicPlayer {
 
     async move(arg: string) {
         let [from, to] = arg.split(" ").map((s) => parseInt(s) - 1);
-        if (from === NaN || to === NaN) {
+        if (isNaN(from) || isNaN(to)) {
             this.invalid();
             return;
         }
@@ -295,7 +294,7 @@ class MusicPlayer {
     async skipto(arg: string) {
         if (!arg) return;
         const idx = parseInt(arg) - 1;
-        if (idx === NaN) {
+        if (isNaN(idx)) {
             this.invalid();
             return;
         }
