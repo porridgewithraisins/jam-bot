@@ -2,24 +2,19 @@
 
 A discord music bot. Aims to replicate a lot of the (deceased) Rythm's features. It is not a public bot, you will need to host it yourself. Although intended for small-scale usage, it does support running on multiple guilds.
 
-## Requirements
+## Usage
 
-You will need the latest node.js installed (Discord.js demands the latest (atleast 16.1), and will not run on the LTS version). Unix users can use the node version manager `n` to upgrade to the latest version.
-
+Although discord.js demands the latest node.js, this library works fine on the regular LTS version of node.
+Moreover, there is currently a bug with a dependency that demands Node 14 LTS be used. If you happen to have another version of node installed, run
 ```
-npm install -g n
-sudo n latest
+npm i node@v14-lts
 ```
-
-Windows users will have to re-download the [latest version](https://nodejs.org/en/download/current).
-
-Discord.js voice interactions may require [ffmpeg](https://www.ffmpeg.org/) (for audio encoding) installed as well.
+to install node 14lts in the current folder only
 
 ## Known bugs
 
-ytdl-core seems to have problems with the audio stream, so songs randomly stop playing. For now, this is gracefully handled by skipping the song. Relevant issue tracker : https://github.com/fent/node-ytdl-core/issues/902
+There is a problem with the audio stream, so songs randomly stop playing. Using Node 14 alleviates the issue. Relevant issue tracker : https://github.com/fent/node-ytdl-core/issues/902
 
-There is a hacky fix for now (built into this package). As and when the issue there gets fixed, this package will update to reflect it.
 
 ## Bugs/Feature requests
 
@@ -31,7 +26,7 @@ Submit an issue in this Github repo.
 -   [x] Add queue support
 -   [x] REPL for every command
 -   [x] Test fully on an actual server
--   [x] Make all commands extend a single interface, to decouple app.ts from the actual commands.
+-   [x] Make all commands part of a single interface, to decouple app.ts from the actual commands.
 -   [x] Support custom prefixes
 -   [x] Duplicate Rythms !search feature
 -   [x] Playlist support (spotify unsupported for now)
