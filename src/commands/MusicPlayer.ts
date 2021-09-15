@@ -254,7 +254,10 @@ class MusicPlayer {
         this.player.on(AudioPlayerStatus.Idle, () => {
             const next = this.nextSong();
             if (next) this.playSong(next);
-            else setTimeout(() => this.quit(), 15000);
+            else
+                setTimeout(() => {
+                    if (!this.songs.length) this.quit();
+                }, 15000);
         });
 
         this.player.on("error", (error) => {

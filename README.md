@@ -11,6 +11,14 @@ npm i node@v14-lts
 ```
 to install node 14lts in the current folder only
 
+## Installation
+
+Confirm that node is installed with
+```
+node -v
+```
+Create a folder for the bot. Then open the folder 
+
 ## Known bugs
 
 There is a problem with the audio stream, so songs randomly stop playing. Using Node 14 alleviates the issue. Relevant issue tracker : https://github.com/fent/node-ytdl-core/issues/902
