@@ -2,6 +2,8 @@
 
 A discord music bot. Aims to replicate a lot of the (deceased) Rythm's features. It is not a public bot, you will need to host it yourself.
 
+https://www.npmjs.com/package/jambot
+
 <hr>
 
 ## Installation
