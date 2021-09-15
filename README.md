@@ -27,7 +27,7 @@ In a terminal, run
 mkdir musicbot
 cd musicbot
 npm init -y
-npm i jambot
+npm i jambot --only=prod
 ```
 You can ignore these warnings
 
