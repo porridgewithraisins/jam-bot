@@ -217,7 +217,12 @@ class MusicPlayer {
         if (this.searchFlow) newSongs = [this.searchResult[possiblyIdx]];
 
         if (!newSongs.length) {
-            newSongs = await getSongs(arg);
+            try {
+                newSongs = await getSongs(arg);
+            } catch (e) {
+                this.sendMsg("Youtube mixes are not supported");
+                return;
+            }
             if (!newSongs.length) {
                 this.sendMsg("Could not find song");
                 return;
@@ -370,12 +375,17 @@ class MusicPlayer {
         this.skip();
     }
     private async playNow(arg: string) {
-        const newSongs = await getSongs(arg);
-        if (newSongs.length) {
-            this.songs.unshift(...newSongs);
-            this.player.stop();
-        } else {
-            this.sendMsg("Could not find song");
+        try {
+            const newSongs = await getSongs(arg);
+
+            if (newSongs.length) {
+                this.songs.unshift(...newSongs);
+                this.player.stop();
+            } else {
+                this.sendMsg("Could not find song");
+            }
+        } catch (e) {
+            this.sendMsg("Youtube mixes are not supported");
         }
     }
 
