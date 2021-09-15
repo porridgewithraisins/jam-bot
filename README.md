@@ -38,5 +38,6 @@ Submit an issue in this Github repo.
 -   [x] Add looping capabilities
 -   [x] Make youtube search better
 -   [x] music.youtube.com support
+-   [ ] Add pagination for !queue command.
 -   [ ] Enable guilds to save playlists to use later
 -   [ ] Add message managing features similar to rythm's !clean to remove the bot's clutter from text channels
