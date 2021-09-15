@@ -1,35 +1,51 @@
 import {
     AudioPlayer,
     AudioPlayerStatus,
+    AudioResource,
     createAudioPlayer,
     createAudioResource,
     getVoiceConnection,
     joinVoiceChannel,
+    StreamType,
 } from "@discordjs/voice";
 import { TextBasedChannels } from "discord.js";
-import { getSong, getStream, searchSong } from "../Songs";
-import { prefixify, mdHyperlinkSong, embedMessage, getArg } from "../Message";
+import { getSongs, getStream, searchYoutube } from "../Songs";
+import {
+    prefixify,
+    mdHyperlinkSong,
+    embedMessage,
+    getArg,
+    showDuration,
+} from "../Message";
 import { Song, MusicPlayerCommandMap, MusicPlayerArgs } from "../types";
+import { getConfig, setConfig } from "../Config";
 
 export { MusicPlayer };
 
 class MusicPlayer {
-    private started: boolean = false;
     private readonly player: AudioPlayer = createAudioPlayer();
     private readonly guildId: string;
     private readonly textChannel: TextBasedChannels;
 
+    //State variables
+    private started = false;
     private songs: Song[] = [];
-    private nowPlaying: Song | undefined = undefined;
-    private readonly onQuitCallback: () => any;
+    private nowPlaying: Song | undefined;
     private silence = false;
     private searchFlow = false;
     private searchResult: Song[] = [];
+    private shouldLoopSong = false;
+    private shouldLoopQueue = false;
+    private currentSongTimeStamp = 0;
+    //State variables
+
+    private readonly onQuitCallback: () => any;
+
     public readonly commands: MusicPlayerCommandMap = {
         help: {
             description: "Show this help message",
             triggers: [prefixify("h"), prefixify("help")],
-            handler: (arg) => this.help(),
+            handler: (_arg) => this.help(),
         },
         search: {
             description:
@@ -46,22 +62,22 @@ class MusicPlayer {
         pause: {
             description: "Pause the currently playing song.",
             triggers: [prefixify("pause"), prefixify("ps")],
-            handler: (arg) => this.pause(),
+            handler: (_arg) => this.pause(),
         },
         np: {
             description: "Show the currently playing song",
             triggers: [prefixify("np"), prefixify("nowplaying")],
-            handler: (arg) => this.showNp(),
+            handler: (_arg) => this.showNp(),
         },
         skip: {
             description: "Skip the current song in the queue",
             triggers: [prefixify("s"), prefixify("skip")],
-            handler: (arg) => this.skip(),
+            handler: (_arg) => this.skip(),
         },
         queue: {
             description: "Show the current queue",
             triggers: [prefixify("q"), prefixify("queue")],
-            handler: (arg) => this.showQueue(),
+            handler: (_arg) => this.showQueue(),
         },
         move: {
             description:
@@ -72,8 +88,13 @@ class MusicPlayer {
         remove: {
             description:
                 "Use `queue` to find the position of the song you want to remove, and call `remove [position]`. Not specifying position is the same as `skip`",
-            triggers: [prefixify("remove")],
+            triggers: [prefixify("remove"), prefixify("r")],
             handler: (arg) => this.remove(arg),
+        },
+        clear: {
+            description: "Clears the current queue",
+            triggers: [prefixify("clear"), prefixify("clr")],
+            handler: (_arg) => this.clear(),
         },
         skipto: {
             description:
@@ -85,22 +106,32 @@ class MusicPlayer {
             description:
                 "playnow [song name/url] plays the song immediately on the top of the queue, the rest of the queue remains intact and will play next",
             triggers: [prefixify("playnow"), prefixify("pn")],
-            handler: (arg) => this.playnow(arg),
+            handler: (arg) => this.playNow(arg),
+        },
+        loop: {
+            description: "Toggles loop of the current song.",
+            triggers: [prefixify("loop"), prefixify("l")],
+            handler: (_arg) => this.toggleLoop(),
+        },
+        loopq: {
+            description: "Toggles loop of the current queue.",
+            triggers: [prefixify("loopq"), prefixify("lq")],
+            handler: (_arg) => this.toggleLoopQueue(),
         },
         shutup: {
-            description: "The music bot will stop sending messages.",
+            description: "The music bot will stop sending text messages.",
             triggers: [prefixify("stfu"), prefixify("shutup")],
-            handler: (arg) => this.shutup(),
+            handler: (_arg) => this.shutup(),
         },
         speakagain: {
             description: "The bot will resume sending messages",
             triggers: [prefixify("talk"), prefixify("speak")],
-            handler: (arg) => this.unshutup(),
+            handler: (_arg) => this.unshutup(),
         },
         quit: {
             description: "Quits the voice channel, and destroys the queue.",
-            triggers: [prefixify("quit")],
-            handler: (arg) => this.quit(),
+            triggers: [prefixify("quit"), prefixify("dc")],
+            handler: (_arg) => this.quit(),
         },
     };
 
@@ -125,7 +156,7 @@ class MusicPlayer {
         }
     }
 
-    async execute(cmd: string, arg: string) {
+    public async execute(cmd: string, arg: string) {
         for (const command of Object.values(this.commands)) {
             if (command.triggers.includes(cmd)) {
                 command.handler(arg);
@@ -138,7 +169,7 @@ class MusicPlayer {
         if (!this.silence) this.textChannel.send(embedMessage(text));
     }
 
-    async help() {
+    private async help() {
         this.sendMsg(
             Object.entries(this.commands)
                 .map(
@@ -150,10 +181,10 @@ class MusicPlayer {
         );
     }
 
-    async search(arg: string) {
+    private async search(arg: string) {
         this.textChannel.sendTyping();
-        const result = await searchSong(getArg(arg));
-        if (!result) {
+        const result = await searchYoutube(getArg(arg));
+        if (!result.length) {
             this.sendMsg(`No songs found matching your query ${arg}`);
             return;
         }
@@ -174,56 +205,84 @@ class MusicPlayer {
         [this.searchFlow, this.searchResult] = [false, []];
     }
 
-    async play(arg: string) {
+    private async play(arg: string) {
         if (!arg) {
             this.resume();
             return;
         }
-        let song: Song | undefined;
-        const possibleIdx = parseInt(arg) - 1;
-        if (this.searchFlow) {
-            if (!this.searchResult[possibleIdx]) {
-                this.invalid();
-                this.endSearchFlow();
-                return;
-            }
-            song = this.searchResult[possibleIdx];
-            this.endSearchFlow();
-        } else {
-            song = await getSong(arg);
-            if (!song) {
+        const possiblyIdx = parseInt(arg) - 1;
+
+        let newSongs: Song[] = [];
+
+        if (this.searchFlow) newSongs = [this.searchResult[possiblyIdx]];
+
+        if (!newSongs.length) {
+            newSongs = await getSongs(arg);
+            if (!newSongs.length) {
                 this.sendMsg("Could not find song");
                 return;
             }
         }
-        this.songs.push(song);
+
+        if (this.searchFlow) this.endSearchFlow();
+
+        this.songs.push(...newSongs);
+
         if (this.player.state.status !== AudioPlayerStatus.Idle)
-            this.sendMsg(`Enqueued: ${mdHyperlinkSong(song)}`);
+            this.sendMsg(
+                `Enqueued ${
+                    newSongs.length > 1
+                        ? "a playlist"
+                        : mdHyperlinkSong(newSongs[0])
+                }`
+            );
+
         if (!this.started) this.initPlayer();
     }
 
-    async initPlayer() {
-        this.started = true;
-        if (this.songs.length)
-            this.playSong((this.nowPlaying = this.songs.shift() as Song));
+    private initPlayer() {
+        if (!this.started) this.started = true;
+
+        const next = this.nextSong();
+        if (next) this.playSong(next);
+
         this.player.on(AudioPlayerStatus.Idle, () => {
-            if (this.songs.length)
-                this.playSong((this.nowPlaying = this.songs.shift() as Song));
-            else this.quit();
+            const next = this.nextSong();
+            if (next) this.playSong(next);
+            else setTimeout(() => this.quit(), 15000);
         });
+
         this.player.on("error", (error) => {
             console.log(error);
             this.sendMsg("Error playing audio");
-            this.quit();
+            this.skip();
         });
     }
 
-    async playSong(song: Song) {
-        this.player.play(createAudioResource(getStream(song)));
-        this.sendMsg(`Now playing : ${mdHyperlinkSong(song)}`);
+    private nextSong() {
+        if (this.shouldLoopSong) return this.nowPlaying;
+
+        const next = this.songs.shift();
+        if (!next) return undefined;
+
+        if (this.shouldLoopQueue) this.songs.push(next);
+
+        this.nowPlaying = next;
+
+        return next;
     }
 
-    async pause() {
+    private async playSong(song: Song) {
+        const audioResource = createAudioResource(await getStream(song), {
+            inputType: StreamType.Opus,
+        });
+
+        this.player.play(audioResource);
+
+        this.currentSongTimeStamp = Date.now();
+        this.showNp();
+    }
+    private async pause() {
         if (this.player.state.status === AudioPlayerStatus.Playing) {
             this.player.pause();
             this.sendMsg("Paused");
@@ -232,7 +291,7 @@ class MusicPlayer {
         }
     }
 
-    async resume() {
+    private async resume() {
         if (this.player.state.status === AudioPlayerStatus.Paused) {
             this.player.unpause();
         } else {
@@ -240,7 +299,7 @@ class MusicPlayer {
         }
     }
 
-    async skip() {
+    private async skip() {
         this.sendMsg("Skipped!");
         this.player.stop(true);
     }
@@ -249,11 +308,12 @@ class MusicPlayer {
         return idx >= 0 && idx < this.songs.length;
     }
 
-    async remove(arg: string) {
+    private async remove(arg: string) {
         if (!arg) {
             this.skip();
             return;
         }
+
         const idx = parseInt(arg) - 1;
         if (isNaN(idx)) {
             this.invalid();
@@ -263,6 +323,7 @@ class MusicPlayer {
             this.sendMsg(`There is nothing at position ${idx + 1}`);
             return;
         }
+
         this.sendMsg(
             `Removed ${mdHyperlinkSong(
                 this.songs.splice(idx, 1)[0]
@@ -270,7 +331,7 @@ class MusicPlayer {
         );
     }
 
-    async move(arg: string) {
+    private async move(arg: string) {
         let [from, to] = arg.split(" ").map((s) => parseInt(s) - 1);
         if (isNaN(from) || isNaN(to)) {
             this.invalid();
@@ -291,31 +352,62 @@ class MusicPlayer {
         this.songs.splice(to, 0, song);
     }
 
-    async skipto(arg: string) {
+    private async clear() {
+        this.songs = [];
+        this.sendMsg("Cleared queue");
+    }
+
+    private async skipto(arg: string) {
         if (!arg) return;
         const idx = parseInt(arg) - 1;
         if (isNaN(idx)) {
             this.invalid();
             return;
         }
+
         this.songs.splice(0, idx);
+
         this.skip();
     }
-    async playnow(arg: string) {
-        const song = await getSong(arg);
-        if (song) {
-            this.songs.unshift(song);
+    private async playNow(arg: string) {
+        const newSongs = await getSongs(arg);
+        if (newSongs.length) {
+            this.songs.unshift(...newSongs);
             this.player.stop();
         } else {
             this.sendMsg("Could not find song");
         }
     }
 
-    async showQueue() {
+    private async toggleLoopQueue() {
+        this.shouldLoopQueue = !this.shouldLoopQueue;
+
+        this.sendMsg(
+            this.shouldLoopQueue ? "Looping queue..." : "Cancelled loop queue"
+        );
+    }
+
+    private async toggleLoop() {
+        this.shouldLoopSong = !this.shouldLoopSong;
+
+        if (this.nowPlaying) {
+            if (this.shouldLoopSong)
+                this.sendMsg(`Looping ${mdHyperlinkSong(this.nowPlaying)}`);
+            else
+                this.sendMsg(
+                    `Cancelled loop on ${mdHyperlinkSong(this.nowPlaying)}`
+                );
+        } else {
+            this.sendMsg("There is nothing playing");
+        }
+    }
+
+    private async showQueue() {
         if (this.songs.length) {
             this.sendMsg(
                 "**Queue**\n" +
                     this.songs
+                        .slice(0, 10)
                         .map(
                             (song, idx) =>
                                 `${idx + 1} : ${mdHyperlinkSong(song)}`
@@ -327,34 +419,40 @@ class MusicPlayer {
         }
     }
 
-    async showNp() {
+    private async showNp() {
         if (this.nowPlaying) {
             this.sendMsg(
-                `**Now playing:** ${mdHyperlinkSong(this.nowPlaying)}`
+                `**Now playing:** ${mdHyperlinkSong(
+                    this.nowPlaying
+                )}    ${showDuration(
+                    this.currentSongTimeStamp,
+                    this.nowPlaying.timestamp
+                )}`
             );
         } else {
             this.sendMsg("There is nothing playing right now");
         }
     }
 
-    async shutup() {
+    private async shutup() {
         this.silence = true;
     }
 
-    async unshutup() {
+    private async unshutup() {
         this.silence = false;
     }
 
-    async invalid() {
+    private async invalid() {
         this.sendMsg("Invalid Command");
     }
 
-    async quit() {
+    private async quit() {
         const con = getVoiceConnection(this.guildId);
         if (con) {
             this.sendMsg("_Disconnecting..._");
             con.disconnect();
         }
+
         this.onQuitCallback();
     }
 }

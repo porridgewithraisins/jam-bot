@@ -4,3 +4,5 @@ todo
 yarn.lock
 /bin
 .vscode
+sample.js
+package-lock.json
