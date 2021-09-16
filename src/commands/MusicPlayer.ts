@@ -608,9 +608,7 @@ class MusicPlayer {
                                 `${idx + 1} : ${mdHyperlinkSong(song)}`
                         )
                         .join("\n") +
-                    remaining
-                    ? `\n...and ${remaining} more`
-                    : ""
+                    (remaining ? `\n...and ${remaining} more` : "")
             );
         } else {
             this.sendMsg("There is nothing queued!");
