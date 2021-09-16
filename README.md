@@ -39,9 +39,8 @@ You can ignore these warnings
 
 Place a javascript file named whatever you like in the `musicbot` folder with the following contents
 ```js
-const bot = require("jambot/bin/Jambot");
+const bot = require("jambot/Jambot");
 
-//so that discordjs shuts up.
 global.AbortController = require('node-abort-controller').AbortController;
 
 bot.init({
