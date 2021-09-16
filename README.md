@@ -65,6 +65,16 @@ You can employ the same instance of the bot across multiple servers, as your com
 
 <hr>
 
+## Development
+Clone this repo, and install all dependencies with
+```
+git clone https://github.com/porridgewithraisins/jam-bot
+cd jam-bot
+npm i
+```
+
+<hr>
+
 ## Updates
 
 You can run `npm update` in a terminal opened to the `musicbot` folder you created for the bot, to update the package if it is available.
@@ -111,6 +121,7 @@ Submit an issue in this Github repo.
 -   [x] Add looping capabilities
 -   [x] Make youtube search better
 -   [x] music.youtube.com support
--   [ ] Add pagination for !queue command.
--   [ ] Enable guilds to save playlists to use later
+-   [x] Enable guilds to save playlists to use later
 -   [ ] Add message managing features similar to rythm's !clean to remove the bot's clutter from text channels
+-   [ ] Queue pagination when showing the !queue command. Plan is to use the new embed buttons.
+-   [ ] Random encoding bugs occur sometimes, find fix.

@@ -53,7 +53,6 @@ const getSongs = async (arg: string): Promise<Song[]> => {
         const [min, sec] = [Math.floor(asInt / 60), asInt % 60];
         return `${min}:${sec}`;
     };
-
     if (validateSongURL(arg)) {
         const details = (await getInfo(arg)).videoDetails;
         return [

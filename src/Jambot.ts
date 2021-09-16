@@ -3,10 +3,17 @@ import { Client, Collection, Message } from "discord.js";
 import { MusicPlayer } from "./commands/MusicPlayer";
 import { Ping } from "./commands/Ping";
 import { getConfig, setConfig } from "./Config";
-import { INTENTS } from "./Constants";
+import { Intents } from "discord.js";
 import { getCmd, getArg, removeLinkMarkdown, prefixify } from "./Message";
 import { Config } from "./types";
+const INTENTS = [
+    Intents.FLAGS.GUILDS,
+    Intents.FLAGS.GUILD_MESSAGES,
+    Intents.FLAGS.GUILD_VOICE_STATES,
+];
 
+export const READYEVENT = "ready";
+export const MSGEVENT = "messageCreate";
 type GuildID = string;
 
 const MusicPlayers = new Collection<GuildID, MusicPlayer>();
@@ -57,7 +64,7 @@ const messageHandler = (message: Message) => {
     }
     const playerForGuild = MusicPlayers.get(id) as MusicPlayer;
     playerForGuild.execute(
-        getCmd(removeLinkMarkdown(message.content)),
-        getArg(removeLinkMarkdown(message.content))
+        removeLinkMarkdown(getCmd(message.content)),
+        removeLinkMarkdown(getArg(message.content)),
     );
 };
