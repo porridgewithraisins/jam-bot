@@ -400,7 +400,7 @@ class MusicPlayer {
             this.invalid();
             return;
         }
-        this.songs = this.songs.filter((_, i) => positions.includes(i));
+        this.songs = this.songs.filter((_, i) => positions.includes(i + 1));
         this.sendMsg("Filtered queue!");
     }
 
@@ -567,7 +567,7 @@ class MusicPlayer {
     private async stashView(arg: string) {
         if (!arg) {
             const storedLists = await Stash.view(this.guildId);
-            if (!Object.keys(storedLists).length) {
+            if (!storedLists || !Object.keys(storedLists).length) {
                 this.sendMsg("There are no stashed queues");
                 return;
             }
