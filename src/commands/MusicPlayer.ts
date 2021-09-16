@@ -597,6 +597,7 @@ class MusicPlayer {
 
     private async showQueue() {
         const revealLimit = 15;
+        const remaining = this.clampAtZero(this.songs.length - revealLimit);
         if (this.songs.length) {
             this.sendMsg(
                 "**Queue**\n" +
@@ -607,9 +608,9 @@ class MusicPlayer {
                                 `${idx + 1} : ${mdHyperlinkSong(song)}`
                         )
                         .join("\n") +
-                    `\n...and ${this.clampAtZero(
-                        this.songs.length - revealLimit
-                    )} more`
+                    remaining
+                    ? `\n...and ${remaining} more`
+                    : ""
             );
         } else {
             this.sendMsg("There is nothing queued!");
