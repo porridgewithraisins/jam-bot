@@ -1,8 +1,0 @@
-src
-test
-.gitignore
-.npmignore
-sample.js
-package-lock.json
-.prettierignore
-tsconfig.json
