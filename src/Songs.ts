@@ -1,35 +1,34 @@
 import ytpl, { Item } from "ytpl";
-import * as yt from "youtube-search-without-api-key";
 import ytdl, {
     getInfo,
     validateURL as validateSongURL,
 } from "ytdl-core-discord";
-import { Song, YoutubeSearchResult } from "./types";
+import { Song } from "./types";
+import ytsr, { Video } from "ytsr";
 
-export { searchYoutube, getSongs, getStream };
+export { searchYt, getSongs, getStream };
 
-const searchYoutube = async (query: string): Promise<Song[]> => {
-    const filterSearchResult = ({
-        snippet: {
-            title,
-            url,
-            duration,
-            thumbnails: { url: thumbnailURL },
-        },
-    }: YoutubeSearchResult): Song => ({
+const searchYt = async (query: string): Promise<Song[]> => {
+    const filter = ({
         title,
         url,
-        timestamp: duration,
-        thumbnail: thumbnailURL as string,
+        bestThumbnail: { url: thumbnail },
+        duration,
+    }: ytsr.Video): Song => ({
+        title,
+        url,
+        thumbnail: thumbnail || undefined,
+        timestamp: duration || "4:42",
     });
-
-    let result: Song[] = [];
-    try {
-        result = (await yt.search(query)).map(filterSearchResult);
-    } catch (e) {
-        console.error(e);
-    }
-    return result;
+    const results = await ytsr.getFilters(query);
+    const typeFilter = results.get("Type");
+    if (!typeFilter) return [];
+    const videoFilter = typeFilter.get("Video");
+    if (!videoFilter) return [];
+    const url = videoFilter.url;
+    if (!url) return [];
+    const searchResults = (await ytsr(url, { pages: 1 })).items;
+    return searchResults.map((item) => filter(item as Video));
 };
 
 const getPlaylist = async (arg: string, limit = Infinity): Promise<Song[]> => {
@@ -64,12 +63,11 @@ const getSongs = async (arg: string): Promise<Song[]> => {
             },
         ];
     }
-    const match = /[&?]list=([a-z0-9_]+)/i.exec(arg)
+    const match = /[&?]list=([a-z0-9_]+)/i.exec(arg);
     if (match) return getPlaylist(arg);
-    const keywordSearchResult = await searchYoutube(arg);
+    const keywordSearchResult = await searchYt(arg);
     if (keywordSearchResult) return keywordSearchResult.slice(0, 1);
     return [];
-    
 };
 
 const getStream = (song: Song) => {

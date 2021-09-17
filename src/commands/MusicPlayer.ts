@@ -8,7 +8,7 @@ import {
     StreamType,
 } from "@discordjs/voice";
 import { TextBasedChannels } from "discord.js";
-import { getSongs, getStream, searchYoutube } from "../Songs";
+import { getSongs, getStream, searchYt } from "../Songs";
 import {
     prefixify,
     mdHyperlinkSong,
@@ -119,18 +119,6 @@ class MusicPlayer {
             triggers: [prefixify("loopq"), prefixify("lq")],
             handler: (_arg) => this.toggleLoopQueue(),
         },
-        sliceq: {
-            description:
-                "Filter the queue down to a slice of your choosing. For example, `sliceq 1 3`",
-            triggers: [prefixify("sliceq")],
-            handler: (arg) => this.sliceQueue(arg),
-        },
-        selectq: {
-            description:
-                "Selects explicitly mentioned positions of the queue. For example, `selectq 1 2 4 6`",
-            triggers: [prefixify("selectq")],
-            handler: (arg) => this.filterQueue(arg),
-        },
         stash: {
             description: `Stash the current queue away for later use. Run ${prefixify(
                 "stash help"
@@ -204,7 +192,7 @@ class MusicPlayer {
 
     private async search(arg: string) {
         this.textChannel.sendTyping();
-        const result = await searchYoutube(getArg(arg));
+        const result = await searchYt(getArg(arg));
         if (!result.length) {
             this.sendMsg(`No songs found matching your query ${arg}`);
             return;

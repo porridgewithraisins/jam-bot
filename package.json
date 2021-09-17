@@ -1,6 +1,6 @@
 {
     "name": "jambot",
-    "version": "1.1.3",
+    "version": "1.1.4",
     "description": "A discord music bot, which you can run locally using your own token, for servers. No configuration required, except the login token",
     "keywords": [
         "discord",
@@ -27,9 +27,9 @@
         "discord.js": "^13.1.0",
         "libsodium-wrappers": "^0.7.9",
         "node-abort-controller": "^3.0.0",
-        "youtube-search-without-api-key": "^1.0.6",
         "ytdl-core-discord": "^1.3.1",
-        "ytpl": "^2.2.3"
+        "ytpl": "^2.2.3",
+        "ytsr": "^3.5.3"
     },
     "devDependencies": {
         "@types/node": "^16.9.1",

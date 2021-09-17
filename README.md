@@ -108,6 +108,9 @@ Submit an issue in this Github repo.
 
 <hr>
 
+## Changelog
+- 1.1.4 Fix youtube search issue
+
 ## Todo
 
 -   [x] Full suite of playback commands
@@ -122,6 +125,7 @@ Submit an issue in this Github repo.
 -   [x] Make youtube search better
 -   [x] music.youtube.com support
 -   [x] Enable guilds to save playlists to use later
+-   [ ] Refactor queue commands
 -   [ ] Add message managing features similar to rythm's !clean to remove the bot's clutter from text channels
 -   [ ] Queue pagination when showing the !queue command. Plan is to use the new embed buttons.
 -   [ ] Random encoding bugs occur sometimes, find fix.
