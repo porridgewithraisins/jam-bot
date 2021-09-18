@@ -351,10 +351,6 @@ class MusicPlayer {
         this.player.stop(true);
     }
 
-    private idxWithinBounds(idx: number) {
-        return idx >= 0 && idx < this.songs.length;
-    }
-
     private async remove(arg: string) {
         if (!arg) {
             this.invalid();
