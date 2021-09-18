@@ -279,7 +279,8 @@ class MusicPlayer {
             if (newSongs.length > 1) this.sendMsg("Enqueued a playlist");
             else
                 this.sendMsg(
-                    mdHyperlinkSong(newSongs[0]),
+                    mdHyperlinkSong(newSongs[0]) +
+                        `\n\n**Position**: ${this.songs.length}`,
                     newSongs[0].thumbnail
                 );
         }
@@ -365,12 +366,12 @@ class MusicPlayer {
             }
             if (idx >= this.songs.length || idx < 0) {
                 this.sendMsg(`There is nothing at position ${idx + 1}`);
-                return;
+            } else {
+                toRemove.push(idx);
+                this.sendMsg(
+                    `Removed ${mdHyperlinkSong(this.songs[idx])} from the queue`
+                );
             }
-            toRemove.push(idx);
-            this.sendMsg(
-                `Removed ${mdHyperlinkSong(this.songs[idx])} from the queue`
-            );
         }
         this.songs = this.songs.filter((_elem, idx) => !toRemove.includes(idx));
     }
@@ -435,6 +436,9 @@ class MusicPlayer {
             this.sendMsg("No range selected");
             return;
         }
+
+        if (to >= this.songs.length) to = this.songs.length;
+
         if (isNaN(toIdx)) {
             this.invalid();
             return;
@@ -458,16 +462,16 @@ class MusicPlayer {
             }
             if (idx >= this.songs.length || idx < 0) {
                 this.sendMsg(`There is nothing at position ${idx + 1}`);
-                return;
+            } else {
+                toKeep.push(idx);
+                this.sendMsg(`Keeping ${mdHyperlinkSong(this.songs[idx])}`);
             }
-            toKeep.push(idx);
-            this.sendMsg(`Keeping ${mdHyperlinkSong(this.songs[idx])}`);
         }
         this.songs = this.songs.filter((_elem, idx) => toKeep.includes(idx));
     }
 
     private async keepRange(arg: string) {
-        const [from, to] = arg.split("-").map((x) => parseInt(x) - 1);
+        let [from, to] = arg.split("-").map((x) => parseInt(x) - 1);
         if (isNaN(from) || isNaN(to)) {
             this.invalid();
             return;
@@ -480,6 +484,8 @@ class MusicPlayer {
             this.sendMsg("No range selected");
             return;
         }
+        if (to >= this.songs.length) to = this.songs.length;
+
         this.songs = this.songs.filter(
             (_elem, idx) => idx >= from && idx <= to
         );
@@ -571,7 +577,7 @@ class MusicPlayer {
     }
     private stashHelp() {
         const introduction =
-            "Jam-bot can save your queues with a name of your choice so you can access it later!\n\nNote that names cannot have spaces";
+            "Jam-bot can save your queues with a name of your choice so you can access it later!\n\nNote that names **cannot** have spaces";
         const helpHelp = "Use `stash help` to view this message";
         const popHelp =
             "Use `stash pop {name}` to append the saved list with name `{name}`. For e.g `stash pop myList`";
@@ -601,13 +607,15 @@ class MusicPlayer {
             this.invalid();
             return;
         }
-        const stored = (await Stash.pop(this.guildId, arg)) as Song[];
+        const stored = (await Stash.pop(this.guildId, arg)) as Song[]; // TODO: make JSON compile-time guaranteed type
         if (stored) {
             this.songs.push(...stored);
             if (!this.started) {
                 this.initPlayer();
             }
-            this.sendMsg("Appended stored songs to end of queue");
+            this.sendMsg(
+                `Appended ${stored.length} songs from ${arg} to the end of queue`
+            );
         } else {
             this.sendMsg(`Could not find a list with name ${arg}`);
         }
@@ -632,7 +640,7 @@ class MusicPlayer {
         }
         if (toBeStored.length) {
             Stash.push(this.guildId, name, toBeStored);
-            this.sendMsg(`Stored as ${name}`);
+            this.sendMsg(`Stored ${toBeStored.length} songs as ${name}`);
         } else {
             this.sendMsg("Cannot store empty queue");
         }
@@ -658,7 +666,13 @@ class MusicPlayer {
             }
         } else {
             const storedList = await Stash.view(this.guildId, arg);
-            this.showStashItem(arg, storedList);
+            if (storedList) {
+                this.showStashItem(arg, storedList);
+                return;
+            } else {
+                this.sendMsg(`Could not find a list with name ${arg}`);
+                return;
+            }
         }
     }
 
@@ -670,7 +684,7 @@ class MusicPlayer {
         const nameText = `**${name}**`;
         const listText = list
             .slice(0, revealLimit)
-            .map(({ title }, idx) => `**${idx + 1}.** ${title}\n`)
+            .map((song, idx) => `**${idx + 1}.** ${mdHyperlinkSong(song)}\n`)
             .join("\n");
         const remaining = this.clampAtZero(list.length - revealLimit);
         const footerText = remaining > 0 ? `...and ${remaining} more` : "";
