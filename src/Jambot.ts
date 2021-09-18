@@ -1,7 +1,7 @@
 import { Client, Collection, Message } from "discord.js";
 
-import { MusicPlayer } from "./commands/MusicPlayer";
-import { Ping } from "./commands/Ping";
+import { MusicPlayer } from "./MusicPlayer";
+import { Ping } from "./Ping";
 import { getConfig, setConfig } from "./Config";
 import { Intents } from "discord.js";
 import { getCmd, getArg, removeLinkMarkdown, prefixify } from "./Message";

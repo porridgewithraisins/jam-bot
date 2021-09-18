@@ -1,5 +1,5 @@
 import { Message } from "discord.js";
-import { embedMessage} from "../Message";
+import { embedMessage} from "./Message";
 
 export class Ping {
     execute(message: Message) {

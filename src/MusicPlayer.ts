@@ -8,7 +8,7 @@ import {
     StreamType,
 } from "@discordjs/voice";
 import { TextBasedChannels } from "discord.js";
-import { getSongs, getStream, searchYt } from "../Songs";
+import { getSongs, getStream, searchYt } from "./Songs";
 import {
     prefixify,
     mdHyperlinkSong,
@@ -16,9 +16,9 @@ import {
     getArg,
     showDuration,
     getCmd,
-} from "../Message";
-import { Song, MusicPlayerCommandMap, MusicPlayerArgs } from "../types";
-import * as Stash from "../Stash";
+} from "./Message";
+import { Song, MusicPlayerCommandMap, MusicPlayerArgs } from "./types";
+import * as Stash from "./Stash";
 export { MusicPlayer };
 
 class MusicPlayer {
