@@ -216,7 +216,7 @@ class MusicPlayer {
 
     private async search(arg: string) {
         this.textChannel.sendTyping();
-        const result = await searchYt(getArg(arg));
+        const result = await searchYt(arg);
         if (!result.length) {
             this.sendMsg(`No songs found matching your query ${arg}`);
             return;
