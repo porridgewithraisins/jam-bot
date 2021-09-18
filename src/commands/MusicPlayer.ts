@@ -31,7 +31,7 @@ class MusicPlayer {
     private songs: Song[] = [];
     private nowPlaying: Song | undefined;
     private silence = false;
-    private searchFlow = false;
+    private isInSearchFlow = false;
     private searchResult: Song[] = [];
     private shouldLoopSong = false;
     private shouldLoopQueue = false;
@@ -83,14 +83,38 @@ class MusicPlayer {
         move: {
             description:
                 "Use `queue` to find out the position of the songs you want to move, and then use it like `move [from_position] [to_position]`",
-            triggers: [prefixify("m"), prefixify("mov"), prefixify("move")],
+            triggers: [prefixify("m"), prefixify("move")],
             handler: (arg) => this.move(arg),
+        },
+        moverange: {
+            description:
+                "Moves a range of the queue. For example, `moverange 1-3 7` moves songs at position 1,2,3 in the queue to position 7",
+            triggers: [prefixify("mr"), prefixify("moverange")],
+            handler: (arg) => this.moveRange(arg),
         },
         remove: {
             description:
-                "Use `queue` to find the position of the song you want to remove, and call `remove [position]`. Not specifying position is the same as `skip`",
+                "Use `queue` to find the position(s) of the song(s) you want to remove, and call `remove [position1] [position2] ...`.",
             triggers: [prefixify("remove"), prefixify("r")],
             handler: (arg) => this.remove(arg),
+        },
+        removerange: {
+            description:
+                "Removes specified range(s) from the queue. For example, `removerange 1-3 4-6` removes songs at positions 1,2,3 and 4,5,6 in the queue",
+            triggers: [prefixify("removerange"), prefixify("rr")],
+            handler: (arg) => this.removeRange(arg),
+        },
+        keep: {
+            description:
+                "Opposite of remove. For example, `keep 1 3` keeps the specified positions 1,3,...in the queue, and discards the rest.",
+            triggers: [prefixify("keep"), prefixify("k")],
+            handler: (arg) => this.keep(arg),
+        },
+        keeprange: {
+            description:
+                "Opposite of removerange. Keeps specified range(s) from the queue. For example, `keeprange 1-3 4-6` keeps songs at positions 1,2,3 and 4,5,6 and discards the rest",
+            triggers: [prefixify("keeprange"), prefixify("kr")],
+            handler: (arg) => this.keepRange(arg),
         },
         clear: {
             description: "Clears the current queue",
@@ -207,11 +231,11 @@ class MusicPlayer {
     }
 
     private startSearchFlow(searchResult: Song[]) {
-        [this.searchFlow, this.searchResult] = [true, searchResult];
+        [this.isInSearchFlow, this.searchResult] = [true, searchResult];
     }
 
     private endSearchFlow() {
-        [this.searchFlow, this.searchResult] = [false, []];
+        [this.isInSearchFlow, this.searchResult] = [false, []];
     }
 
     private async play(arg: string) {
@@ -219,26 +243,37 @@ class MusicPlayer {
             this.resume();
             return;
         }
-        const possiblyIdx = parseInt(arg) - 1;
 
         let newSongs: Song[] = [];
-
-        if (this.searchFlow) newSongs = [this.searchResult[possiblyIdx]];
+        if (this.isInSearchFlow) {
+            for (const pos of arg.split(" ")) {
+                const [possiblyFrom, possiblyTo] = pos
+                    .split("-")
+                    .map((x) => parseInt(x) - 1);
+                if (!isNaN(possiblyFrom)) {
+                    if (possiblyTo && !isNaN(possiblyTo)) {
+                        newSongs.push(
+                            ...this.searchResult.slice(
+                                possiblyFrom,
+                                possiblyTo + 1
+                            )
+                        );
+                    } else {
+                        newSongs.push(this.searchResult[possiblyFrom]);
+                    }
+                }
+            }
+            this.endSearchFlow();
+        }
 
         if (!newSongs.length) {
-            try {
-                newSongs = await getSongs(arg);
-            } catch (e) {
-                console.log(e);
-                return;
-            }
+            newSongs = await getSongs(arg);
             if (!newSongs.length) {
-                this.sendMsg("Could not find song");
+                this.sendMsg("Could not find song)");
                 return;
             }
         }
 
-        if (this.searchFlow) this.endSearchFlow();
         this.songs.push(...newSongs);
         if (this.player.state.status !== AudioPlayerStatus.Idle) {
             if (newSongs.length > 1) this.sendMsg("Enqueued a playlist");
@@ -322,25 +357,49 @@ class MusicPlayer {
 
     private async remove(arg: string) {
         if (!arg) {
-            this.skip();
-            return;
-        }
-
-        const idx = parseInt(arg) - 1;
-        if (isNaN(idx)) {
             this.invalid();
             return;
         }
-        if (!this.idxWithinBounds(idx)) {
-            this.sendMsg(`There is nothing at position ${idx + 1}`);
+        const toRemove: number[] = [];
+        for (const pos of arg.split(" ")) {
+            const idx = parseInt(pos) - 1;
+            if (isNaN(idx)) {
+                this.invalid();
+                return;
+            }
+            if (idx >= this.songs.length || idx < 0) {
+                this.sendMsg(`There is nothing at position ${idx + 1}`);
+                return;
+            }
+            toRemove.push(idx);
+            this.sendMsg(
+                `Removed ${mdHyperlinkSong(this.songs[idx])} from the queue`
+            );
+        }
+        this.songs = this.songs.filter((_elem, idx) => !toRemove.includes(idx));
+    }
+
+    private async removeRange(arg: string) {
+        if (!arg) {
+            this.invalid();
             return;
         }
-
-        this.sendMsg(
-            `Removed ${mdHyperlinkSong(
-                this.songs.splice(idx, 1)[0]
-            )} from the queue`
-        );
+        let [from, to] = arg.split("-").map((x) => parseInt(x) - 1);
+        if (isNaN(from) || isNaN(to)) {
+            this.invalid();
+            return;
+        }
+        if (from < 0 || from >= this.songs.length) {
+            this.sendMsg(`There is nothing at position ${from + 1}`);
+            return;
+        }
+        if (to <= from) {
+            this.sendMsg("Invalid range");
+            return;
+        }
+        if (to >= this.songs.length) to = this.songs.length - 1;
+        this.songs.splice(from, to - from + 1);
+        this.sendMsg(`Removed ${to - from + 1} songs from the queue`);
     }
 
     private async move(arg: string) {
@@ -349,7 +408,7 @@ class MusicPlayer {
             this.invalid();
             return;
         }
-        if (!this.idxWithinBounds(from)) {
+        if (from < 0 || from >= this.songs.length) {
             this.sendMsg(`There is nothing at position ${from + 1}`);
             return;
         }
@@ -360,36 +419,75 @@ class MusicPlayer {
         if (to >= this.songs.length) to = this.songs.length - 1;
 
         const song = this.songs.splice(from, 1)[0];
-        this.sendMsg(`Moving ${mdHyperlinkSong(song)} to position ${to + 1}`);
         this.songs.splice(to, 0, song);
+        this.sendMsg(`Moving ${mdHyperlinkSong(song)} to position ${to + 1}`);
     }
 
-    private async sliceQueue(arg: string) {
-        let [from, to] = arg.split(" ").map((x) => parseInt(x));
+    private async moveRange(arg: string) {
+        const [fromRange, toIndex] = arg.split(" ");
+        let [from, to] = fromRange.split("-").map((x) => parseInt(x) - 1);
+        let toIdx = parseInt(toIndex) - 1;
         if (isNaN(from) || isNaN(to)) {
             this.invalid();
             return;
         }
-        if (!this.idxWithinBounds(from)) {
+        if (from < 0 || from >= this.songs.length) {
             this.sendMsg(`There is nothing at position ${from + 1}`);
             return;
         }
-        if (to < 0) {
-            this.sendMsg("Invalid field for to");
+        if (to <= from) {
+            this.sendMsg("No range selected");
             return;
         }
-        this.songs = this.songs.slice(from - 1, to);
-        this.sendMsg("Sliced queue!");
-    }
-
-    private async filterQueue(arg: string) {
-        const positions = arg.split(" ").map((x) => parseInt(x));
-        if (positions.some(isNaN)) {
+        if (isNaN(toIdx)) {
             this.invalid();
             return;
         }
-        this.songs = this.songs.filter((_, i) => positions.includes(i + 1));
-        this.sendMsg("Filtered queue!");
+        const spliced = this.songs.splice(from, to - from + 1);
+        this.songs.splice(toIdx, 0, ...spliced);
+        this.sendMsg(`Moving from position ${from + 1} to position ${to + 1}`);
+    }
+
+    private async keep(arg: string) {
+        if (!arg) {
+            this.invalid();
+            return;
+        }
+        const toKeep: number[] = [];
+        for (const pos of arg.split(" ")) {
+            const idx = parseInt(pos) - 1;
+            if (isNaN(idx)) {
+                this.invalid();
+                return;
+            }
+            if (idx >= this.songs.length || idx < 0) {
+                this.sendMsg(`There is nothing at position ${idx + 1}`);
+                return;
+            }
+            toKeep.push(idx);
+            this.sendMsg(`Keeping ${mdHyperlinkSong(this.songs[idx])}`);
+        }
+        this.songs = this.songs.filter((_elem, idx) => toKeep.includes(idx));
+    }
+
+    private async keepRange(arg: string) {
+        const [from, to] = arg.split("-").map((x) => parseInt(x) - 1);
+        if (isNaN(from) || isNaN(to)) {
+            this.invalid();
+            return;
+        }
+        if (from < 0 || from >= this.songs.length) {
+            this.sendMsg(`There is nothing at position ${from + 1}`);
+            return;
+        }
+        if (to <= from) {
+            this.sendMsg("No range selected");
+            return;
+        }
+        this.songs = this.songs.filter(
+            (_elem, idx) => idx >= from && idx <= to
+        );
+        this.sendMsg(`Kept ${to - from + 1} songs. Discarded the rest`);
     }
 
     private async clear() {
