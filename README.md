@@ -128,3 +128,4 @@ Submit an issue in this Github repo.
 -   [ ] Add message managing features similar to rythm's !clean to remove the bot's clutter from text channels
 -   [ ] Queue pagination when showing the !queue command. Plan is to use the new discord embed buttons.
 -   [ ] Random encoding bugs occur rarely, find fix.
+-   [ ] Spotify and soundcloud support
