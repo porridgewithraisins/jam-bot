@@ -1,6 +1,6 @@
 {
     "name": "jambot",
-    "version": "1.1.4",
+    "version": "1.1.5",
     "description": "A discord music bot, which you can run locally using your own token, for servers. No configuration required, except the login token",
     "keywords": [
         "discord",
@@ -20,7 +20,8 @@
     },
     "scripts": {
         "build": "tsc",
-        "prepublish": "tsc && cp package.json bin && cp README.md bin"
+        "prepublish": "tsc && cp package.json bin && cp README.md bin",
+        "test": "node sample.js"
     },
     "dependencies": {
         "@discordjs/voice": "^0.6.0",
