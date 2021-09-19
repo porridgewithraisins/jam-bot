@@ -3,8 +3,7 @@
 Once you've [created an application and obtained your token](TOKEN.md), follow
 these steps to add your bot to a server.
 
-1. Go to the [https://discord.com/developers/applications](Discord developer
-   portal).
+1. Go to the [Discord developer portal](https://discord.com/developers/applications).
 2. Select the application you created and go to the OAuth2 section.
 3. Scroll down to "OAuth2 URL generator" and check the `bot` box.
 4. Next, scroll down to "Bot Permissions" and grant it the following permissions:

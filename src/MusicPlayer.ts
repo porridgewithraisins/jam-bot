@@ -62,7 +62,7 @@ class MusicPlayer {
         },
         pause: {
             description: "Pause the currently playing song.",
-            triggers: [prefixify("pause"), prefixify("ps")],
+            triggers: [prefixify("pause"), prefixify("stop")],
             handler: (_arg) => this.pause(),
         },
         np: {
