@@ -81,7 +81,7 @@ node jambot.config.js
 
 Use the `!ping` command in a text channel to confirm the bot is working, join a
 voice channel, and use `!help` to see all available commands. (Note that you
-will need to change the prefix depending on whatever you )
+will need to change the prefix depending on what you configured it as)
 
 You can employ the same instance of the bot across multiple servers, but this
 depends on your computer's resources.
