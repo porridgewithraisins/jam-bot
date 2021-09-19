@@ -1,7 +1,6 @@
 # Getting a bot token
 
-1. Go to the [https://discord.com/developers/applications](Discord developer
-   portal).
+1. Go to the [Discord developer portal](https://discord.com/developers/applications).
 2. Click the blue "New Application" button in the top corner.
 3. Give the new application a suitable name.
 4. Next, go to the "Bot" section and click "Add Bot".
