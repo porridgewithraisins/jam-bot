@@ -133,6 +133,7 @@ Submit an issue in this Github repo.
 
 ## Changelog
 
+- 1.1.6 When multiple instances of the bot are running in the same guild, bots only respond to commands sent by members it shares a voice channel with.
 - 1.1.5 Add better queue management and support ranges everywhere indexes are
   supported, such as in !search
 - 1.1.4 Fix youtube search issue.
