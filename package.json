@@ -21,7 +21,7 @@
     "scripts": {
         "build": "tsc",
         "prepublish": "tsc && cp package.json bin && cp README.md bin",
-        "test": "node sample.js"
+        "test": "tsc && node sample.js"
     },
     "dependencies": {
         "@discordjs/voice": "^0.6.0",

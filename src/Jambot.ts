@@ -49,6 +49,14 @@ const messageHandler = (message: Message) => {
         message.reply("You need to be in a voice channel first");
         return;
     }
+    if (
+        message.guild.me &&
+        message.guild.me.voice &&
+        message.guild.me.voice.channel &&
+        message.guild.me.voice.channel.id !== message.member.voice.channel.id
+    ) {
+        return;
+    }
 
     const id: GuildID = message.guild.id;
     if (!MusicPlayers.has(id)) {
@@ -63,8 +71,8 @@ const messageHandler = (message: Message) => {
         );
     }
     const playerForGuild = MusicPlayers.get(id) as MusicPlayer;
-    playerForGuild.execute(
+    playerForGuild.mainController(
         removeLinkMarkdown(getCmd(message.content)),
-        removeLinkMarkdown(getArg(message.content)),
+        removeLinkMarkdown(getArg(message.content))
     );
 };

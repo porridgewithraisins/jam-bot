@@ -189,7 +189,7 @@ class MusicPlayer {
         this.stashingAllowed = Stash.init();
     }
 
-    public async execute(cmd: string, arg: string) {
+    public async mainController(cmd: string, arg: string) {
         for (const command of Object.values(this.commands)) {
             if (command.triggers.includes(cmd)) {
                 command.handler(arg);
