@@ -1,30 +1,40 @@
 # jam-bot
 
-A discord music bot. Aims to replicate a lot of the (deceased) Rythm's features. It is not a public bot, you will need to host it yourself.
+A self-hosted Discord music bot. Aims to be a feature-compatible replacement for
+recently taken-down bots like Rythm and Groovy.
 
 https://www.npmjs.com/package/jambot
 
-<hr>
+---
 
-## Installation
+## Usage
 
-Confirm that Node.js is installed with
+### Prerequisites
 
-```bash
-node -v
-```
-
-You need to have Node.js v14 LTS installed (this is the default, but in case you installed a higher version for a different reason).
-
-If you need to have a different node version system-wide, then you can install Node.js v14 just for this folder with
+You need to have Node.js v14 LTS installed<sup> [1](#known-bugs)</sup>. This is
+the default version, but in case you need to have a different node version
+system-wide, you can install v14 for jam-bot alone by running
 
 ```bash
 npm i node@v14-lts
 ```
 
-For certain songs, [ffmpeg](https://www.ffmpeg.org/) needs to be installed due to the nature of their encoding. Linux systems mostly have this installed by default. But if you run another OS you will need to install it. (It is a useful program overall anyway)
+in your terminal.
 
-In a terminal, run
+Confirm that Node.js is installed by running
+
+```bash
+node -v
+```
+
+Certain tracks will need [ffmpeg](https://www.ffmpeg.org/) to be decoded. A lot
+of systems may already have this installed, but you will need to
+[install it yourself](https://ffmpeg.org/download.html) if you do not have it.
+
+### Installing
+
+Once the prerequisites are satisfied, run the following commands one after the
+other in a terminal.
 
 ```bash
 mkdir musicbot
@@ -35,13 +45,14 @@ npm i jambot --only=prod
 
 You can ignore these warnings
 
-<img src = "https://i.imgur.com/hHwdTHn.png" width = 400 alt = "you can ignore discordjs unsupported engine errors">
+<img src="https://i.imgur.com/hHwdTHn.png" width=400 alt="unsupported engine warnings from discord.js">
 
-<hr>
+---
 
 ## Usage
 
-Place a javascript file named whatever you like in the `musicbot` folder with the following contents
+Place a javascript file named `jambot.config.js` (Or whatever else you like) in
+the `musicbot` folder with the following contents
 
 ```js
 const bot = require("jambot/Jambot");
@@ -49,28 +60,33 @@ const bot = require("jambot/Jambot");
 global.AbortController = require("node-abort-controller").AbortController;
 
 bot.init({
-    token: "your_token_here",
-    prefix: "!",
+  token: "your_token_here",
+  prefix: "!",
 });
 ```
 
 That's it!
 
-Now fill the token field with your actual bot token, and the prefix field with whatever you'd like the command prefix to be (even multiple characters are fine)
+Now fill the token field with [your actual bot token](docs/TOKEN.md), and the
+prefix field with whatever you'd like the command prefix to be (even multiple
+characters are fine).
 
-Then run this file like so:
+Run this file with the following command:
 
 ```
-node name_of_file.js
+node jambot.config.js
 ```
 
-Add the bot to your server
+[Add the bot to your server.](docs/ADDING.md)
 
-Send `!ping` in a text channel to confirm the bot is working, and then join a voice channel, and send `!help` to see all available commands.
+Use the `!ping` command in a text channel to confirm the bot is working, join a
+voice channel, and use `!help` to see all available commands. (Note that you
+will need to change the prefix depending on whatever you )
 
-You can employ the same instance of the bot across multiple servers, as your computer's resources allow.
+You can employ the same instance of the bot across multiple servers, but this
+depends on your computer's resources.
 
-<hr>
+---
 
 ## Development
 
@@ -82,50 +98,41 @@ cd jam-bot
 npm i
 ```
 
-<hr>
+---
 
 ## Updates
 
-You can run `npm update` in a terminal opened to the `musicbot` folder you created for the bot, to update the package if it is available.
+You can run `npm update` in a terminal opened to the `musicbot` folder you
+created for the bot, to update the package if it is available.
 
-<hr>
+---
 
 ## Uninstall
 
-There is no effect outside the `musicbot` folder you created for the bot. So simply deleting the folder suffices.
+There is no effect outside the `musicbot` folder you created for the bot. So
+simply deleting the folder suffices.
 
-<hr>
-
-## Note
-
--   Spotify / Soundcloud support is yet to be added.
-
-<hr>
+---
 
 ## Known bugs
 
--   _Description_:
-        There is a problem with the audio stream returned by ytdl on node.js v16. Relevant issue tracker : https://github.com/fent/node-ytdl-core/issues/902
+- _Description_: There is a problem with the audio stream returned by ytdl on
+  node.js v16. Relevant issue tracker :
+  https://github.com/fent/node-ytdl-core/issues/902
 
-    _Status_:
-    Workaround implemented - Using node v14 even though discordjs complains.
+  _Status_: Workaround implemented - Using node v14 even though discordjs
+  complains.
 
-<hr>
+---
 
 ## Bugs/Feature requests
 
 Submit an issue in this Github repo.
 
-<hr>
+---
 
 ## Changelog
 
--   1.1.5 Add better queue management and support ranges everywhere indexes are supported, such as in !search
--   1.1.4 Fix youtube search issue
-
-## Todo
-
--   [ ] Add message managing features similar to rythm's !clean to remove the bot's clutter from text channels
--   [ ] Queue pagination when showing the !queue command. Plan is to use the new discord embed buttons.
--   [ ] Random encoding bugs occur rarely, find fix.
--   [ ] Spotify and soundcloud support
+- 1.1.5 Add better queue management and support ranges everywhere indexes are
+  supported, such as in !search
+- 1.1.4 Fix youtube search issue.
