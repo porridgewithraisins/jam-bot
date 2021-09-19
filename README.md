@@ -121,7 +121,7 @@ simply deleting the folder suffices.
   https://github.com/fent/node-ytdl-core/issues/902
 
   _Status_: Workaround implemented - Using node v14 even though discordjs
-  complains.
+  complains. [AbortController](https://www.npmjs.com/package/node-abort-controller) is also required
 
 ---
 
