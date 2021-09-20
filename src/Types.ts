@@ -27,6 +27,7 @@ export interface Song {
     url: string;
     duration: string;
     thumbnail?: string;
+    artist?: string;
 }
 
 export interface NowPlaying extends Song {

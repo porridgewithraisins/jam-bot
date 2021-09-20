@@ -23,5 +23,20 @@ export const durationToMs = (duration: string) => {
     if (tokens.length <= 2) {
         return (tokens[0] * 60 + tokens[1]) * 1000;
     }
-    return (tokens[0] * 3600 + tokens[1] * 60 + tokens[2]) * 1000    
+    return (tokens[0] * 3600 + tokens[1] * 60 + tokens[2]) * 1000;
+};
+
+export const millisecToHhMmSs = (ms: number) => {
+    let time = Math.floor(ms / 1000);
+    const ss = time % 60;
+    time = Math.floor(time / 60);
+    const mm = time % 60;
+    time = Math.floor(time / 60);
+    const hh = time % 60;
+    return hh ? [hh, mm, ss] : [mm, ss];
+};
+
+export const removeTopicAtEnd = (artist: string) => {
+    if (artist.slice(-8) === " - Topic") return artist.slice(0, -8);
+    return artist;
 };

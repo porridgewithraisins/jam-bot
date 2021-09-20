@@ -14,11 +14,13 @@ const searchYt = async (query: string): Promise<Song[]> => {
         url,
         bestThumbnail: { url: thumbnail },
         duration,
+        author
     }: ytsr.Video): Song => ({
         title,
         url,
         thumbnail: thumbnail || undefined,
         duration: duration || "4:42",
+        artist : author?.name
     });
     const results = await ytsr.getFilters(query);
     const typeFilter = results.get("Type");
@@ -37,11 +39,13 @@ const getPlaylist = async (arg: string, limit = Infinity): Promise<Song[]> => {
         url,
         duration,
         bestThumbnail: { url: thumbURL },
+        author: { name },
     }: Item): Song => ({
         title,
         url,
         duration: duration as string,
         thumbnail: thumbURL as string,
+        artist: name,
     });
     return (await ytpl(arg, { limit })).items.map(filterItems);
 };
@@ -60,6 +64,7 @@ const getSongs = async (arg: string): Promise<Song[]> => {
                 url: details.video_url,
                 duration: toDuration(details.lengthSeconds),
                 thumbnail: details.thumbnails[0].url,
+                artist: details.author.name,
             },
         ];
     }

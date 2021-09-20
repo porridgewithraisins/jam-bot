@@ -692,9 +692,6 @@ class MusicPlayer {
     private async quit() {
         const con = getVoiceConnection(this.guildId);
         if (con) {
-            this.textChannel.send({
-                embeds: [new MessageEmbed().setDescription("")],
-            });
             this.messenger("_Disconnecting..._");
             con.disconnect();
         }
