@@ -4,8 +4,8 @@ import { MusicPlayer } from "./MusicPlayer";
 import { Ping } from "./Ping";
 import { getConfig, setConfig } from "./Config";
 import { Intents } from "discord.js";
-import { getCmd, getArg, removeLinkMarkdown, prefixify } from "./Message";
-import { Config } from "./types";
+import { getCmd, getArg, removeLinkMarkdown, prefixify } from "./Utils";
+import { Config } from "./Types";
 const INTENTS = [
     Intents.FLAGS.GUILDS,
     Intents.FLAGS.GUILD_MESSAGES,

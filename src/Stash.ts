@@ -1,6 +1,6 @@
 import fs, { constants } from "fs";
 import path from "path";
-import { Song } from "./types";
+import { Song } from "./Types";
 const STASH_DIR = path.join(__dirname, "stash");
 
 export { init, push, pop, drop, view };

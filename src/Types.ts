@@ -1,5 +1,6 @@
 import { DiscordGatewayAdapterCreator } from "@discordjs/voice";
 import { StageChannel, TextBasedChannels, VoiceChannel } from "discord.js";
+import { ElapsedTimer } from "./ElapsedTimer";
 
 export interface Config {
     token: string;
@@ -24,6 +25,10 @@ export interface MusicPlayerCommandMap {
 export interface Song {
     title: string;
     url: string;
-    timestamp: string;
+    duration: string;
     thumbnail?: string;
+}
+
+export interface NowPlaying extends Song {
+    elapsedTimer: ElapsedTimer;
 }

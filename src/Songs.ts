@@ -3,7 +3,7 @@ import ytdl, {
     getInfo,
     validateURL as validateSongURL,
 } from "ytdl-core-discord";
-import { Song } from "./types";
+import { Song } from "./Types";
 import ytsr, { Video } from "ytsr";
 
 export { searchYt, getSongs, getStream };
@@ -18,7 +18,7 @@ const searchYt = async (query: string): Promise<Song[]> => {
         title,
         url,
         thumbnail: thumbnail || undefined,
-        timestamp: duration || "4:42",
+        duration: duration || "4:42",
     });
     const results = await ytsr.getFilters(query);
     const typeFilter = results.get("Type");
@@ -40,14 +40,14 @@ const getPlaylist = async (arg: string, limit = Infinity): Promise<Song[]> => {
     }: Item): Song => ({
         title,
         url,
-        timestamp: duration as string,
+        duration: duration as string,
         thumbnail: thumbURL as string,
     });
     return (await ytpl(arg, { limit })).items.map(filterItems);
 };
 
 const getSongs = async (arg: string): Promise<Song[]> => {
-    const toTimestamp = (seconds: string) => {
+    const toDuration = (seconds: string) => {
         const asInt = parseInt(seconds);
         const [min, sec] = [Math.floor(asInt / 60), asInt % 60];
         return `${min}:${sec}`;
@@ -58,7 +58,7 @@ const getSongs = async (arg: string): Promise<Song[]> => {
             {
                 title: details.title,
                 url: details.video_url,
-                timestamp: toTimestamp(details.lengthSeconds),
+                duration: toDuration(details.lengthSeconds),
                 thumbnail: details.thumbnails[0].url,
             },
         ];

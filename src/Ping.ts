@@ -1,8 +1,8 @@
 import { Message } from "discord.js";
-import { embedMessage} from "./Message";
+import * as Messaging from "./Messaging";
 
 export class Ping {
     execute(message: Message) {
-        message.channel.send(embedMessage("Pong"));
+        Messaging.messenger(message, "Pong");
     }
 }
