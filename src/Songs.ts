@@ -68,10 +68,8 @@ const getSongs = async (arg: string): Promise<Song[]> => {
     const match = /[&?]list=([a-z0-9_]+)/i.exec(arg);
     if (match) return getPlaylist(arg);
     const keywordSearchResult = await searchYt(arg);
-    if (keywordSearchResult) return keywordSearchResult.slice(0, 1);
-    return [];
+    return keywordSearchResult.slice(0, 1);
 };
-
 
 const getStream = (song: Song) => {
     return ytdl(prependHttp(song.url), { filter: "audioonly" });

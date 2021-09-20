@@ -3,7 +3,7 @@ import { MusicPlayerCommand, NowPlaying, Song } from "./Types";
 import { removeTopicAtEnd } from "./Utils";
 
 const baseEmbed = () => {
-    return new MessageEmbed().setColor("#5e81ac").setTimestamp();
+    return new MessageEmbed().setColor("#5e81ac");
 };
 
 export const textView = (text: string) => baseEmbed().setDescription(text);
@@ -13,11 +13,7 @@ export const songView = ({ title, url, thumbnail, artist }: Song) =>
         .setTitle(title)
         .setURL(url)
         .addField("Artist", removeTopicAtEnd(artist || "Unknown"), true)
-        .setAuthor(
-            "Jam-Bot",
-            undefined,
-            "https://github.com/porridgewithraisins/jambot"
-        )
+        .setAuthor("Now Playing")
         .setThumbnail(thumbnail || "styled J");
 
 export const nowPlayingView = ({
