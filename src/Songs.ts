@@ -1,26 +1,22 @@
 import ytpl, { Item } from "ytpl";
-import ytdl, {
-    getInfo,
-    validateURL as validateSongURL,
-} from "ytdl-core-discord";
+import ytdl, * as ytdlCoreDiscord from "ytdl-core-discord";
 import { Song } from "./Types";
 import ytsr, { Video } from "ytsr";
-
 export { searchYt, getSongs, getStream };
 
 const searchYt = async (query: string): Promise<Song[]> => {
-    const filter = ({
+    const filterItems = ({
         title,
         url,
         bestThumbnail: { url: thumbnail },
         duration,
-        author
+        author,
     }: ytsr.Video): Song => ({
         title,
         url,
         thumbnail: thumbnail || undefined,
         duration: duration || "4:42",
-        artist : author?.name
+        artist: author?.name,
     });
     const results = await ytsr.getFilters(query);
     const typeFilter = results.get("Type");
@@ -30,7 +26,7 @@ const searchYt = async (query: string): Promise<Song[]> => {
     const url = videoFilter.url;
     if (!url) return [];
     const searchResults = (await ytsr(url, { pages: 1 })).items;
-    return searchResults.map((item) => filter(item as Video));
+    return searchResults.map((item) => filterItems(item as Video));
 };
 
 const getPlaylist = async (arg: string, limit = Infinity): Promise<Song[]> => {
@@ -56,8 +52,8 @@ const getSongs = async (arg: string): Promise<Song[]> => {
         const [min, sec] = [Math.floor(asInt / 60), asInt % 60];
         return `${min}:${sec}`;
     };
-    if (validateSongURL(arg)) {
-        const details = (await getInfo(arg)).videoDetails;
+    if (ytdlCoreDiscord.validateURL(arg)) {
+        const details = (await ytdlCoreDiscord.getInfo(arg)).videoDetails;
         return [
             {
                 title: details.title,
@@ -68,12 +64,14 @@ const getSongs = async (arg: string): Promise<Song[]> => {
             },
         ];
     }
+
     const match = /[&?]list=([a-z0-9_]+)/i.exec(arg);
     if (match) return getPlaylist(arg);
     const keywordSearchResult = await searchYt(arg);
     if (keywordSearchResult) return keywordSearchResult.slice(0, 1);
     return [];
 };
+
 
 const getStream = (song: Song) => {
     return ytdl(prependHttp(song.url), { filter: "audioonly" });

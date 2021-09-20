@@ -5,6 +5,11 @@ import { ElapsedTimer } from "./ElapsedTimer";
 export interface Config {
     token: string;
     prefix: string;
+    spotify?: {
+        clientID: string;
+        clientSecret: string;
+    };
+    localFolder?: string;
 }
 
 export interface MusicPlayerArgs {
@@ -33,3 +38,4 @@ export interface Song {
 export interface NowPlaying extends Song {
     elapsedTimer: ElapsedTimer;
 }
+

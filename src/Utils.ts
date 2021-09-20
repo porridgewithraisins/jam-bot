@@ -40,3 +40,7 @@ export const removeTopicAtEnd = (artist: string) => {
     if (artist.slice(-8) === " - Topic") return artist.slice(0, -8);
     return artist;
 };
+
+export const clampAtZero = (x: number) => {
+    return x < 0 ? 0 : x;
+};

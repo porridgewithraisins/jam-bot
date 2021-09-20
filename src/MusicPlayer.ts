@@ -9,7 +9,13 @@ import {
 } from "@discordjs/voice";
 import { MessageEmbed, TextBasedChannels } from "discord.js";
 import { getSongs, getStream, searchYt } from "./Songs";
-import { prefixify, mdHyperlinkSong, getArg, getCmd } from "./Utils";
+import {
+    prefixify,
+    mdHyperlinkSong,
+    getArg,
+    getCmd,
+    clampAtZero,
+} from "./Utils";
 import {
     Song,
     MusicPlayerCommandMap,
@@ -234,7 +240,16 @@ class MusicPlayer {
     }
 
     private async help() {
-        // TODO help view
+        //TODO help view
+        this.messenger(
+            Object.entries(this.commands)
+                .map(
+                    ([, { description, triggers }]) =>
+                        `**Commands**: ${triggers.join(", ")}\n` +
+                        (description ? `**Description**: ${description}\n` : "")
+                )
+                .join("\n")
+        );
     }
 
     private async search(arg: string) {
@@ -246,6 +261,12 @@ class MusicPlayer {
         }
         this.startSearchFlow(result);
         // TODO paginated list view
+        this.messenger(
+            "**Search result**\n" +
+                result
+                    .map((song, idx) => `${idx + 1}: ${mdHyperlinkSong(song)}`)
+                    .join("\n")
+        );
     }
 
     private startSearchFlow(searchResult: Song[]) {
@@ -570,7 +591,7 @@ class MusicPlayer {
             return;
         }
         const [subcmd, arg] = [getCmd(_arg), getArg(_arg)];
-        if (!arg) {
+        if (subcmd === "help") {
             this.stashHelp();
             return;
         }
@@ -585,6 +606,16 @@ class MusicPlayer {
         const introduction =
             "Jam-bot can save your queues with a name of your choice so you can access it later!\n\nNote that names **cannot** have spaces";
         //TODO helpView
+        this.messenger(
+            [
+                introduction,
+                ...Object.entries(this.stashCommands).map(
+                    ([, { description, triggers }]) =>
+                        `**Commands**: ${triggers.join(", ")}\n` +
+                        (description ? `**Description**: ${description}\n` : "")
+                ),
+            ].join("\n")
+        );
     }
 
     private async stashPop(arg: string) {
@@ -641,6 +672,10 @@ class MusicPlayer {
 
     private async stashView(arg: string) {
         if (!arg) {
+            this.invalid();
+            return;
+        }
+        if (arg === "*") {
             const storedLists = await Stash.view(this.guildId);
             if (!storedLists || !Object.keys(storedLists).length) {
                 this.messenger("There are no stashed queues");
@@ -648,11 +683,13 @@ class MusicPlayer {
             }
             for (const name in storedLists) {
                 //TODO paginated list view
+                this.showStashItem(name, storedLists[name]);
             }
         } else {
             const storedList = await Stash.view(this.guildId, arg);
             if (storedList) {
                 //TODO paginated list view
+                this.showStashItem(arg, storedList);
                 return;
             } else {
                 this.messenger(`Could not find a list with name ${arg}`);
@@ -661,9 +698,34 @@ class MusicPlayer {
         }
     }
 
+    private showStashItem(name: string, list: Song[]) {
+        const revealLimit = 10;
+        const nameText = `**${name}**`;
+        const listText = list
+            .slice(0, revealLimit)
+            .map((song, idx) => `**${idx + 1}.** ${mdHyperlinkSong(song)}\n`)
+            .join("\n");
+        const remaining = clampAtZero(list.length - revealLimit);
+        const footerText = remaining > 0 ? `...and ${remaining} more` : "";
+        this.messenger([nameText, listText, footerText].join("\n"));
+    }
+
     private async showQueue() {
+        const revealLimit = 15;
+        const remaining = clampAtZero(this.songs.length - revealLimit);
         if (this.songs.length) {
             //TODO paginated list view
+            this.messenger(
+                "**Queue**\n" +
+                    this.songs
+                        .slice(0, revealLimit)
+                        .map(
+                            (song, idx) =>
+                                `${idx + 1} : ${mdHyperlinkSong(song)}`
+                        )
+                        .join("\n") +
+                    (remaining ? `\n...and ${remaining} more` : "")
+            );
         } else {
             this.messenger("There is nothing queued!");
         }

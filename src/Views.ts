@@ -18,7 +18,7 @@ export const songView = ({ title, url, thumbnail, artist }: Song) =>
             undefined,
             "https://github.com/porridgewithraisins/jambot"
         )
-        .setImage(thumbnail || "styled J");
+        .setThumbnail(thumbnail || "styled J");
 
 export const nowPlayingView = ({
     title,
