@@ -359,8 +359,7 @@ class MusicPlayer {
         });
 
         this.player.play(audioResource);
-
-        this.nowPlaying = { ...song, elapsedTimer: new ElapsedTimer() };
+        this.nowPlaying = { ...song, elapsedTimer: new ElapsedTimer(song.duration) };
         this.showNp();
     }
     private async pause() {
