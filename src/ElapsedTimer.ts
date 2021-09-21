@@ -1,4 +1,8 @@
-import { durationToMs, millisecToHhMmSs, padOneZero } from "./Utils";
+import {
+    cleanDuration,
+    durationToMs,
+    millisecToHhMmSs,
+} from "./Utils";
 
 export class ElapsedTimer {
     private elapsedMs = 0;
@@ -26,6 +30,6 @@ export class ElapsedTimer {
     }
 
     get elapsed() {
-        return `${millisecToHhMmSs(this.elapsedMs).map(padOneZero).join(":")}`;
+        return cleanDuration(millisecToHhMmSs(this.elapsedMs));
     }
 }

@@ -12,8 +12,6 @@ const INTENTS = [
     Intents.FLAGS.GUILD_VOICE_STATES,
 ];
 
-export const READYEVENT = "ready";
-export const MSGEVENT = "messageCreate";
 type GuildID = string;
 
 const MusicPlayers = new Collection<GuildID, MusicPlayer>();

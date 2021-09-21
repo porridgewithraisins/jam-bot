@@ -16,12 +16,18 @@ export const prefixify = (text: string) => getConfig().prefix + text;
 
 export const padOneZero = (x: number) => ("0" + x).slice(-2);
 
-export const mdHyperlinkSong = (song: Song) => `[${song.title}](${song.url})`;
+export const mdHyperlinkSong = ({
+    title,
+    url,
+}: {
+    title: string;
+    url: string;
+}) => `[${title}](${url})`;
 
 export const durationToMs = (duration: string) => {
     const tokens = duration.split(":").map((x) => parseInt(x));
     if (tokens.length <= 2) {
-        return (tokens[0] * 60 + tokens[1]) * 1000;
+        return (tokens[0] * 60 + (tokens[1] || 0)) * 1000;
     }
     return (tokens[0] * 3600 + tokens[1] * 60 + tokens[2]) * 1000;
 };
@@ -33,7 +39,7 @@ export const millisecToHhMmSs = (ms: number) => {
     const mm = time % 60;
     time = Math.floor(time / 60);
     const hh = time % 60;
-    return hh ? [hh, mm, ss] : [mm, ss];
+    return (hh ? [hh, mm, ss] : [mm, ss]).join(':');
 };
 
 export const removeTopicAtEnd = (artist: string) => {
@@ -41,6 +47,29 @@ export const removeTopicAtEnd = (artist: string) => {
     return artist;
 };
 
-export const clampAtZero = (x: number) => {
-    return x < 0 ? 0 : x;
+export const clampAtZero = (x: number) => (x < 0 ? 0 : x);
+
+export const mod = (x: number, m: number) => ((x % m) + m) % m;
+
+export const coerceSize = (str: string, n: number) => {
+    if (str.length > n) {
+        return str.substr(0, n - 3) + "...";
+    }
+    if (str.length < n - 11) {
+        return (
+            str +
+            "**" +
+            Array(n - str.length - 11)
+                .fill("\t")
+                .join("") +
+            "**"
+        );
+    }
+    return str;
+};
+
+export const cleanDuration = (duration: string) => {
+    const tokens = duration.split(":").map((x) => parseInt(x));
+    if (tokens.some(isNaN)) return duration;
+    return tokens.map(padOneZero).join(":");
 };

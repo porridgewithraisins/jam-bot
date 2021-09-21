@@ -7,7 +7,6 @@ import {
     joinVoiceChannel,
     StreamType,
 } from "@discordjs/voice";
-import { MessageEmbed, TextBasedChannels } from "discord.js";
 import { getSongs, getStream, searchYt } from "./Songs";
 import {
     prefixify,
@@ -24,14 +23,15 @@ import {
 } from "./Types";
 import * as Stash from "./Stash";
 import { ElapsedTimer } from "./ElapsedTimer";
-import { nowPlayingView, songView } from "./Views";
+import { nowPlayingView, paginatedListView, songView } from "./Views";
 import * as Messaging from "./Messaging";
+
 export { MusicPlayer };
 
 class MusicPlayer {
     private readonly player: AudioPlayer = createAudioPlayer();
     private readonly guildId: string;
-    private readonly textChannel: TextBasedChannels;
+    private readonly messenger: Messaging.Messenger;
 
     //State variables
     private started = false;
@@ -207,7 +207,7 @@ class MusicPlayer {
         adapter,
         onQuitCallback,
     }: MusicPlayerArgs) {
-        this.textChannel = text;
+        this.messenger = new Messaging.Messenger(text);
         this.guildId = guildId;
         this.onQuitCallback = onQuitCallback || (() => {});
         try {
@@ -218,10 +218,7 @@ class MusicPlayer {
             }).subscribe(this.player);
         } catch (error) {
             console.error(error);
-            Messaging.messenger(
-                this.textChannel,
-                "Error connecting to the voice channel!"
-            );
+            this.messenger.send("Error connecting to the voice channel!");
         }
         this.stashingAllowed = Stash.init();
     }
@@ -235,13 +232,8 @@ class MusicPlayer {
         }
     }
 
-    private async messenger(arg: string | MessageEmbed | MessageEmbed[]) {
-        if (!this.silence) Messaging.messenger(this.textChannel, arg);
-    }
-
     private async help() {
-        //TODO help view
-        this.messenger(
+        this.messenger.send(
             Object.entries(this.commands)
                 .map(
                     ([, { description, triggers }]) =>
@@ -253,19 +245,15 @@ class MusicPlayer {
     }
 
     private async search(arg: string) {
-        this.textChannel.sendTyping();
+        this.messenger.sendTyping();
         const result = await searchYt(arg);
         if (!result.length) {
-            this.messenger(`No songs found matching your query ${arg}`);
+            this.messenger.send(`No songs found matching your query ${arg}`);
             return;
         }
         this.startSearchFlow(result);
-        // TODO paginated list view
-        this.messenger(
-            "**Search result**\n" +
-                result
-                    .map((song, idx) => `${idx + 1}: ${mdHyperlinkSong(song)}`)
-                    .join("\n")
+        this.messenger.paginate(
+            paginatedListView(`Search for '${arg}'`, this.searchResult)
         );
     }
 
@@ -308,7 +296,7 @@ class MusicPlayer {
         if (!newSongs.length) {
             newSongs = await getSongs(arg);
             if (!newSongs.length) {
-                this.messenger("Could not find song");
+                this.messenger.send("Could not find song");
                 return;
             }
         }
@@ -316,8 +304,10 @@ class MusicPlayer {
         this.songs.push(...newSongs);
         if (this.player.state.status !== AudioPlayerStatus.Idle) {
             if (newSongs.length > 1)
-                this.messenger(`Enqueued ${newSongs.length} songs`);
-            else this.messenger(songView(newSongs[0]));
+                this.messenger.send(
+                    `Added ${newSongs.length} songs to the queue`
+                );
+            else this.messenger.send(songView(newSongs[0]));
         }
 
         if (!this.started) this.initPlayer();
@@ -337,7 +327,7 @@ class MusicPlayer {
 
         this.player.on("error", (error) => {
             console.log(error);
-            this.messenger("Error playing audio. Skipping");
+            this.messenger.send("Error playing audio. Skipping");
             this.skip();
         });
     }
@@ -359,16 +349,19 @@ class MusicPlayer {
         });
 
         this.player.play(audioResource);
-        this.nowPlaying = { ...song, elapsedTimer: new ElapsedTimer(song.duration) };
+        this.nowPlaying = {
+            ...song,
+            elapsedTimer: new ElapsedTimer(song.duration),
+        };
         this.showNp();
     }
     private async pause() {
         if (this.player.state.status === AudioPlayerStatus.Playing) {
             this.player.pause();
             this.nowPlaying?.elapsedTimer.pause();
-            this.messenger("Paused");
+            this.messenger.send("Paused");
         } else {
-            this.messenger("Nothing is playing");
+            this.messenger.send("Nothing is playing");
         }
     }
 
@@ -377,12 +370,12 @@ class MusicPlayer {
             this.player.unpause();
             this.nowPlaying?.elapsedTimer.play();
         } else {
-            this.messenger("No song specified");
+            this.messenger.send("No song specified");
         }
     }
 
     private async skip() {
-        this.messenger("Skipped!");
+        this.messenger.send("Skipped!");
         this.player.stop(true);
     }
 
@@ -399,10 +392,10 @@ class MusicPlayer {
                 return;
             }
             if (idx >= this.songs.length || idx < 0) {
-                this.messenger(`There is nothing at position ${idx + 1}`);
+                this.messenger.send(`There is nothing at position ${idx + 1}`);
             } else {
                 toRemove.push(idx);
-                this.messenger(
+                this.messenger.send(
                     `Removed ${mdHyperlinkSong(this.songs[idx])} from the queue`
                 );
             }
@@ -421,16 +414,16 @@ class MusicPlayer {
             return;
         }
         if (from < 0 || from >= this.songs.length) {
-            this.messenger(`There is nothing at position ${from + 1}`);
+            this.messenger.send(`There is nothing at position ${from + 1}`);
             return;
         }
         if (to <= from) {
-            this.messenger("Invalid range");
+            this.messenger.send("Invalid range");
             return;
         }
         if (to >= this.songs.length) to = this.songs.length - 1;
         this.songs.splice(from, to - from + 1);
-        this.messenger(`Removed ${to - from + 1} songs from the queue`);
+        this.messenger.send(`Removed ${to - from + 1} songs from the queue`);
     }
 
     private async move(arg: string) {
@@ -440,18 +433,20 @@ class MusicPlayer {
             return;
         }
         if (from < 0 || from >= this.songs.length) {
-            this.messenger(`There is nothing at position ${from + 1}`);
+            this.messenger.send(`There is nothing at position ${from + 1}`);
             return;
         }
         if (to < 0) {
-            this.messenger(`Cannot move to ${to + 1}`);
+            this.messenger.send(`Cannot move to ${to + 1}`);
             return;
         }
         if (to >= this.songs.length) to = this.songs.length - 1;
 
         const song = this.songs.splice(from, 1)[0];
         this.songs.splice(to, 0, song);
-        this.messenger(`Moving ${mdHyperlinkSong(song)} to position ${to + 1}`);
+        this.messenger.send(
+            `Moving ${mdHyperlinkSong(song)} to position ${to + 1}`
+        );
     }
 
     private async moveRange(arg: string) {
@@ -463,11 +458,11 @@ class MusicPlayer {
             return;
         }
         if (from < 0 || from >= this.songs.length) {
-            this.messenger(`There is nothing at position ${from + 1}`);
+            this.messenger.send(`There is nothing at position ${from + 1}`);
             return;
         }
         if (to <= from) {
-            this.messenger("No range selected");
+            this.messenger.send("No range selected");
             return;
         }
 
@@ -479,7 +474,7 @@ class MusicPlayer {
         }
         const spliced = this.songs.splice(from, to - from + 1);
         this.songs.splice(toIdx, 0, ...spliced);
-        this.messenger(
+        this.messenger.send(
             `Moving from position ${from + 1} to position ${to + 1}`
         );
     }
@@ -497,10 +492,12 @@ class MusicPlayer {
                 return;
             }
             if (idx >= this.songs.length || idx < 0) {
-                this.messenger(`There is nothing at position ${idx + 1}`);
+                this.messenger.send(`There is nothing at position ${idx + 1}`);
             } else {
                 toKeep.push(idx);
-                this.messenger(`Keeping ${mdHyperlinkSong(this.songs[idx])}`);
+                this.messenger.send(
+                    `Keeping ${mdHyperlinkSong(this.songs[idx])}`
+                );
             }
         }
         this.songs = this.songs.filter((_elem, idx) => toKeep.includes(idx));
@@ -513,11 +510,11 @@ class MusicPlayer {
             return;
         }
         if (from < 0 || from >= this.songs.length) {
-            this.messenger(`There is nothing at position ${from + 1}`);
+            this.messenger.send(`There is nothing at position ${from + 1}`);
             return;
         }
         if (to <= from) {
-            this.messenger("No range selected");
+            this.messenger.send("No range selected");
             return;
         }
         if (to >= this.songs.length) to = this.songs.length;
@@ -525,12 +522,12 @@ class MusicPlayer {
         this.songs = this.songs.filter(
             (_elem, idx) => idx >= from && idx <= to
         );
-        this.messenger(`Kept ${to - from + 1} songs. Discarded the rest`);
+        this.messenger.send(`Kept ${to - from + 1} songs. Discarded the rest`);
     }
 
     private async clear() {
         this.songs = [];
-        this.messenger("Cleared queue!");
+        this.messenger.send("Cleared queue!");
     }
 
     private async skipto(arg: string) {
@@ -554,7 +551,7 @@ class MusicPlayer {
                 this.songs.unshift(...newSongs);
                 this.player.stop();
             } else {
-                this.messenger("Could not find song");
+                this.messenger.send("Could not find song");
             }
         } catch (e) {
             console.log(e);
@@ -564,7 +561,7 @@ class MusicPlayer {
     private async toggleLoopQueue() {
         this.shouldLoopQueue = !this.shouldLoopQueue;
 
-        this.messenger(
+        this.messenger.send(
             this.shouldLoopQueue ? "Looping queue..." : "Cancelled loop queue"
         );
     }
@@ -574,19 +571,21 @@ class MusicPlayer {
 
         if (this.nowPlaying) {
             if (this.shouldLoopSong)
-                this.messenger(`Looping ${mdHyperlinkSong(this.nowPlaying)}`);
+                this.messenger.send(
+                    `Looping ${mdHyperlinkSong(this.nowPlaying)}`
+                );
             else
-                this.messenger(
+                this.messenger.send(
                     `Cancelled loop on ${mdHyperlinkSong(this.nowPlaying)}`
                 );
         } else {
-            this.messenger("There is nothing playing");
+            this.messenger.send("There is nothing playing");
         }
     }
 
     private async stashController(_arg: string) {
         if (!this.stashingAllowed) {
-            this.messenger("Stashing is not possible right now, Sorry!");
+            this.messenger.send("Stashing is not possible right now, Sorry!");
             return;
         }
         const [subcmd, arg] = [getCmd(_arg), getArg(_arg)];
@@ -604,8 +603,7 @@ class MusicPlayer {
     private stashHelp() {
         const introduction =
             "Jam-bot can save your queues with a name of your choice so you can access it later!\n\nNote that names **cannot** have spaces";
-        //TODO helpView
-        this.messenger(
+        this.messenger.send(
             [
                 introduction,
                 ...Object.entries(this.stashCommands).map(
@@ -628,11 +626,11 @@ class MusicPlayer {
             if (!this.started) {
                 this.initPlayer();
             }
-            this.messenger(
+            this.messenger.send(
                 `Appended ${stored.length} songs from ${arg} to the end of queue`
             );
         } else {
-            this.messenger(`Could not find a list with name ${arg}`);
+            this.messenger.send(`Could not find a list with name ${arg}`);
         }
     }
 
@@ -655,9 +653,9 @@ class MusicPlayer {
         }
         if (toBeStored.length) {
             Stash.push(this.guildId, name, toBeStored);
-            this.messenger(`Stored ${toBeStored.length} songs as ${name}`);
+            this.messenger.send(`Stored ${toBeStored.length} songs as ${name}`);
         } else {
-            this.messenger("Cannot store empty queue");
+            this.messenger.send("Cannot store empty queue");
         }
     }
     private async stashDrop(arg: string) {
@@ -666,7 +664,7 @@ class MusicPlayer {
             return;
         }
         Stash.drop(this.guildId, arg);
-        this.messenger(`Dropped queue ${arg}`);
+        this.messenger.send(`Dropped queue ${arg}`);
     }
 
     private async stashView(arg: string) {
@@ -677,21 +675,19 @@ class MusicPlayer {
         if (arg === "*") {
             const storedLists = await Stash.view(this.guildId);
             if (!storedLists || !Object.keys(storedLists).length) {
-                this.messenger("There are no stashed queues");
+                this.messenger.send("There are no stashed queues");
                 return;
             }
             for (const name in storedLists) {
-                //TODO paginated list view
                 this.showStashItem(name, storedLists[name]);
             }
         } else {
             const storedList = await Stash.view(this.guildId, arg);
             if (storedList) {
-                //TODO paginated list view
                 this.showStashItem(arg, storedList);
                 return;
             } else {
-                this.messenger(`Could not find a list with name ${arg}`);
+                this.messenger.send(`Could not find a list with name ${arg}`);
                 return;
             }
         }
@@ -702,39 +698,26 @@ class MusicPlayer {
         const nameText = `**${name}**`;
         const listText = list
             .slice(0, revealLimit)
-            .map((song, idx) => `**${idx + 1}.** ${mdHyperlinkSong(song)}\n`)
+            .map((song, idx) => `**${idx + 1}.** ${mdHyperlinkSong(song)}`)
             .join("\n");
         const remaining = clampAtZero(list.length - revealLimit);
         const footerText = remaining > 0 ? `...and ${remaining} more` : "";
-        this.messenger([nameText, listText, footerText].join("\n"));
+        this.messenger.send([nameText, listText, footerText].join("\n"));
     }
 
     private async showQueue() {
-        const revealLimit = 15;
-        const remaining = clampAtZero(this.songs.length - revealLimit);
         if (this.songs.length) {
-            //TODO paginated list view
-            this.messenger(
-                "**Queue**\n" +
-                    this.songs
-                        .slice(0, revealLimit)
-                        .map(
-                            (song, idx) =>
-                                `${idx + 1} : ${mdHyperlinkSong(song)}`
-                        )
-                        .join("\n") +
-                    (remaining ? `\n...and ${remaining} more` : "")
-            );
+            this.messenger.paginate(paginatedListView("Queue", this.songs));
         } else {
-            this.messenger("There is nothing queued!");
+            this.messenger.send("There is nothing queued!");
         }
     }
 
     private async showNp() {
         if (this.nowPlaying) {
-            this.messenger(nowPlayingView(this.nowPlaying));
+            this.messenger.send(nowPlayingView(this.nowPlaying));
         } else {
-            this.messenger("There is nothing playing right now");
+            this.messenger.send("There is nothing playing right now");
         }
     }
 
@@ -747,13 +730,13 @@ class MusicPlayer {
     }
 
     private async invalid() {
-        this.messenger("Invalid Command");
+        this.messenger.send("Invalid Command");
     }
 
     private async quit() {
         const con = getVoiceConnection(this.guildId);
         if (con) {
-            this.messenger("_Disconnecting..._");
+            this.messenger.send("_Disconnecting..._");
             con.disconnect();
         }
 
