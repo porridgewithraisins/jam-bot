@@ -1,6 +1,6 @@
-import { DiscordGatewayAdapterCreator } from "@discordjs/voice";
-import { StageChannel, TextBasedChannels, VoiceChannel } from "discord.js";
-import { ElapsedTimer } from "./ElapsedTimer";
+import * as voice from "@discordjs/voice";
+import * as discordJs from "discord.js";
+import * as Timer from "../services/timer/Timer";
 
 export interface Config {
     token: string;
@@ -10,12 +10,13 @@ export interface Config {
         clientSecret: string;
     };
     localFolder?: string;
+    logPerformance?: boolean;
 }
 
 export interface MusicPlayerArgs {
-    text: TextBasedChannels;
-    voice: VoiceChannel | StageChannel;
-    adapter: DiscordGatewayAdapterCreator;
+    textChannel: discordJs.TextBasedChannels;
+    initialVoiceChannel: discordJs.VoiceChannel | discordJs.StageChannel;
+    adapterCreator: voice.DiscordGatewayAdapterCreator;
     onQuitCallback?: () => any;
 }
 export interface MusicPlayerCommand {
@@ -36,6 +37,12 @@ export interface Song {
 }
 
 export interface NowPlaying extends Song {
-    elapsedTimer: ElapsedTimer;
+    elapsedTimer: Timer.ElapsedTimer;
 }
 
+export type SongSource =
+    | "youtube"
+    | "youtube-playlist"
+    | "youtube-search"
+    | "spotify"
+    | "spotify-playlist";

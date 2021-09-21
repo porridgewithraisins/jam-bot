@@ -1,45 +1,49 @@
-import { Client, Collection, Message } from "discord.js";
+import * as process from "process";
+import * as discordJs from "discord.js";
+import * as MusicPlayer from "./commands/MusicPlayer";
+import * as Ping from "./commands/Ping";
+import * as Config from "./config/Config";
+import * as Utils from "./common/Utils";
+import * as Types from "./common/Types";
 
-import { MusicPlayer } from "./MusicPlayer";
-import { Ping } from "./Ping";
-import { getConfig, setConfig } from "./Config";
-import { Intents } from "discord.js";
-import { getCmd, getArg, removeLinkMarkdown, prefixify } from "./Utils";
-import { Config } from "./Types";
-const INTENTS = [
-    Intents.FLAGS.GUILDS,
-    Intents.FLAGS.GUILD_MESSAGES,
-    Intents.FLAGS.GUILD_VOICE_STATES,
-];
-
-type GuildID = string;
-
-const MusicPlayers = new Collection<GuildID, MusicPlayer>();
-
-const client = new Client({
-    intents: INTENTS,
+const client = new discordJs.Client({
+    intents: [
+        discordJs.Intents.FLAGS.GUILDS,
+        discordJs.Intents.FLAGS.GUILD_MESSAGES,
+        discordJs.Intents.FLAGS.GUILD_VOICE_STATES,
+    ],
 });
 
-export function init(config: Config) {
-    setConfig(config);
-    client.login(getConfig().token);
+export function init(config: Types.Config) {
+    Config.setConfig(config);
+    if (config.logPerformance)
+        setInterval(() => console.log(process.resourceUsage()), 600_000);
+    
+    client.login(Config.getConfig().token);
 
     client.on("ready", async () => console.log("ready"));
 
     client.on("messageCreate", messageHandler);
 }
 
-const messageHandler = (message: Message) => {
+type GuildID = string;
+
+const MusicPlayers = new discordJs.Collection<
+    GuildID,
+    MusicPlayer.MusicPlayer
+>();
+
+const messageHandler = async (message: discordJs.Message) => {
     if (
-        !message.content.startsWith(getConfig().prefix) ||
+        !message.content.startsWith(Config.getConfig().prefix) ||
         message.author.bot ||
         !message.guild
     ) {
         return;
     }
 
-    if (message.content === prefixify("ping")) {
-        new Ping().execute(message);
+    if (message.content === Utils.prefixify("ping")) {
+        new Ping.Ping().execute(client, message);
         return;
     }
 
@@ -55,22 +59,19 @@ const messageHandler = (message: Message) => {
     ) {
         return;
     }
-
     const id: GuildID = message.guild.id;
     if (!MusicPlayers.has(id)) {
         MusicPlayers.set(
             id,
-            new MusicPlayer({
-                text: message.channel,
-                voice: message.member.voice.channel,
-                adapter: message.guild.voiceAdapterCreator,
+            new MusicPlayer.MusicPlayer({
+                textChannel: message.channel,
+                initialVoiceChannel: message.member.voice.channel,
+                adapterCreator: message.guild.voiceAdapterCreator,
                 onQuitCallback: () => MusicPlayers.delete(id),
             })
         );
     }
-    const playerForGuild = MusicPlayers.get(id) as MusicPlayer;
-    playerForGuild.mainController(
-        removeLinkMarkdown(getCmd(message.content)),
-        removeLinkMarkdown(getArg(message.content))
-    );
+
+    const playerForGuild = MusicPlayers.get(id) as MusicPlayer.MusicPlayer;
+    playerForGuild.controller(message.content);
 };

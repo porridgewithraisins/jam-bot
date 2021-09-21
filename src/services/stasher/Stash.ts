@@ -1,6 +1,6 @@
-import fs, { constants } from "fs";
+import * as fs from "fs";
 import path from "path";
-import { Song } from "./Types";
+import * as Types from "../../common/Types";
 const STASH_DIR = path.join(__dirname, "stash");
 
 export { init, push, pop, drop, view };
@@ -16,7 +16,7 @@ const fileExists = (path: string) =>
 
 const init = () => {
     try {
-        fs.accessSync(__dirname, constants.R_OK | constants.W_OK);
+        fs.accessSync(__dirname, fs.constants.R_OK | fs.constants.W_OK);
         if (!fs.existsSync(STASH_DIR)) fs.mkdirSync(STASH_DIR);
         return true;
     } catch (e) {
@@ -28,9 +28,9 @@ const init = () => {
     }
 };
 
-const push = (guildId: string, name: string, list: Song[]) => {
+const push = (guildId: string, name: string, list: Types.Song[]) => {
     const filePath = getFileForGuild(guildId);
-    fs.readFile(filePath, (err, data) => {
+    fs.readFile(filePath, (_err, data) => {
         try {
             const stored = JSON.parse(data.toString());
             stored[name] = list;
@@ -51,8 +51,7 @@ const pop = async (guildId: string, name: string) => {
     if (await fileExists(filePath)) {
         const stored = JSON.parse(fs.readFileSync(filePath).toString());
         return stored[name];
-    }
-    else {
+    } else {
         return undefined;
     }
 };
@@ -72,8 +71,7 @@ const drop = (guildId: string, name: string) => {
     return undefined;
 };
 
-
-const view = async (guildId : string, name ?: string) => {
+const view = async (guildId: string, name?: string) => {
     const filePath = getFileForGuild(guildId);
     if (await fileExists(filePath)) {
         const stored = JSON.parse(fs.readFileSync(filePath).toString());
@@ -81,4 +79,4 @@ const view = async (guildId : string, name ?: string) => {
     } else {
         return undefined;
     }
-}
+};

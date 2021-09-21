@@ -1,179 +1,163 @@
-import {
-    AudioPlayer,
-    AudioPlayerStatus,
-    createAudioPlayer,
-    createAudioResource,
-    getVoiceConnection,
-    joinVoiceChannel,
-    StreamType,
-} from "@discordjs/voice";
-import { getSongs, getStream, searchYt } from "./Songs";
-import {
-    prefixify,
-    mdHyperlinkSong,
-    getArg,
-    getCmd,
-    clampAtZero,
-} from "./Utils";
-import {
-    Song,
-    MusicPlayerCommandMap,
-    MusicPlayerArgs,
-    NowPlaying,
-} from "./Types";
-import * as Stash from "./Stash";
-import { ElapsedTimer } from "./ElapsedTimer";
-import { nowPlayingView, paginatedListView, songView } from "./Views";
-import * as Messaging from "./Messaging";
+import * as voice from "@discordjs/voice";
+import * as Utils from "../common/Utils";
+import * as Types from "../common/Types";
+import * as Stash from "../services/stasher/Stash";
+import * as Timer from "../services/timer/Timer";
+import * as Views from "../views/Views";
+import * as Messaging from "../services/interaction/Messaging";
+import * as Searcher from "../services/searchers/Searcher";
+import * as Fetcher from "../services/fetchers/Fetcher";
+import * as Streamer from "../services/streamers/Streamer";
 
-export { MusicPlayer };
-
-class MusicPlayer {
-    private readonly player: AudioPlayer = createAudioPlayer();
+export class MusicPlayer {
+    private readonly player: voice.AudioPlayer = voice.createAudioPlayer();
     private readonly guildId: string;
     private readonly messenger: Messaging.Messenger;
 
     //State variables
     private started = false;
-    private songs: Song[] = [];
-    private nowPlaying: NowPlaying | undefined;
-    private silence = false;
+    private songs: Types.Song[] = [];
+    private nowPlaying: Types.NowPlaying | undefined;
     private isInSearchFlow = false;
-    private searchResult: Song[] = [];
+    private searchResult: Types.Song[] = [];
     private shouldLoopSong = false;
     private shouldLoopQueue = false;
     private stashingAllowed = false;
     //State variables
 
-    //State variables
     private readonly onQuitCallback: () => any;
 
-    public readonly commands: MusicPlayerCommandMap = {
+    public readonly commands: Types.MusicPlayerCommandMap = {
         help: {
             description: "Show this help message",
-            triggers: [prefixify("h"), prefixify("help")],
+            triggers: [Utils.prefixify("h"), Utils.prefixify("help")],
             handler: (_arg) => this.help(),
         },
         search: {
             description:
                 "Search for a song, and then choose a position in it, to play",
-            triggers: [prefixify("search")],
+            triggers: [Utils.prefixify("search")],
             handler: (arg) => this.search(arg),
         },
         play: {
             description:
                 "`play [song name/url]`. Don't specify any song, to resume a paused song",
-            triggers: [prefixify("p"), prefixify("play")],
+            triggers: [Utils.prefixify("p"), Utils.prefixify("play")],
             handler: (arg) => this.play(arg),
         },
         pause: {
             description: "Pause the currently playing song.",
-            triggers: [prefixify("pause"), prefixify("stop")],
+            triggers: [Utils.prefixify("pause"), Utils.prefixify("stop")],
             handler: (_arg) => this.pause(),
         },
         np: {
             description: "Show the currently playing song",
-            triggers: [prefixify("np"), prefixify("nowplaying")],
+            triggers: [Utils.prefixify("np"), Utils.prefixify("nowplaying")],
             handler: (_arg) => this.showNp(),
         },
         skip: {
             description: "Skip the current song in the queue",
-            triggers: [prefixify("s"), prefixify("skip")],
+            triggers: [Utils.prefixify("s"), Utils.prefixify("skip")],
             handler: (_arg) => this.skip(),
         },
         queue: {
             description: "Show the current queue",
-            triggers: [prefixify("q"), prefixify("queue")],
+            triggers: [Utils.prefixify("q"), Utils.prefixify("queue")],
             handler: (_arg) => this.showQueue(),
         },
         move: {
             description:
                 "Use `queue` to find out the position of the songs you want to move, and then use it like `move [from_position] [to_position]`",
-            triggers: [prefixify("m"), prefixify("move")],
+            triggers: [Utils.prefixify("m"), Utils.prefixify("move")],
             handler: (arg) => this.move(arg),
         },
         moverange: {
             description:
                 "Moves a range of the queue. For example, `moverange 1-3 7` moves songs at position 1,2,3 in the queue to position 7",
-            triggers: [prefixify("mr"), prefixify("moverange")],
+            triggers: [Utils.prefixify("mr"), Utils.prefixify("moverange")],
             handler: (arg) => this.moveRange(arg),
         },
         remove: {
             description:
                 "Use `queue` to find the position(s) of the song(s) you want to remove, and call `remove [position1] [position2] ...`.",
-            triggers: [prefixify("remove"), prefixify("r")],
+            triggers: [Utils.prefixify("remove"), Utils.prefixify("r")],
             handler: (arg) => this.remove(arg),
         },
         removerange: {
             description:
                 "Removes specified range(s) from the queue. For example, `removerange 1-3 4-6` removes songs at positions 1,2,3 and 4,5,6 in the queue",
-            triggers: [prefixify("removerange"), prefixify("rr")],
+            triggers: [Utils.prefixify("removerange"), Utils.prefixify("rr")],
             handler: (arg) => this.removeRange(arg),
         },
         keep: {
             description:
                 "Opposite of remove. For example, `keep 1 3` keeps the specified positions 1,3,...in the queue, and discards the rest.",
-            triggers: [prefixify("keep"), prefixify("k")],
+            triggers: [Utils.prefixify("keep"), Utils.prefixify("k")],
             handler: (arg) => this.keep(arg),
         },
         keeprange: {
             description:
                 "Opposite of removerange. Keeps specified range(s) from the queue. For example, `keeprange 1-3 4-6` keeps songs at positions 1,2,3 and 4,5,6 and discards the rest",
-            triggers: [prefixify("keeprange"), prefixify("kr")],
+            triggers: [Utils.prefixify("keeprange"), Utils.prefixify("kr")],
             handler: (arg) => this.keepRange(arg),
         },
         clear: {
             description: "Clears the current queue",
-            triggers: [prefixify("clear"), prefixify("clr")],
+            triggers: [Utils.prefixify("clear"), Utils.prefixify("clr")],
             handler: (_arg) => this.clear(),
         },
         skipto: {
             description:
                 "skipto [index] skips to the position in the queue, forgetting all the songs before it",
-            triggers: [prefixify("skipto")],
+            triggers: [Utils.prefixify("skipto")],
             handler: (arg) => this.skipto(arg),
         },
         playnow: {
             description:
                 "playnow [song name/url] plays the song immediately on the top of the queue, the rest of the queue remains intact and will play next",
-            triggers: [prefixify("playnow"), prefixify("pn")],
+            triggers: [Utils.prefixify("playnow"), Utils.prefixify("pn")],
             handler: (arg) => this.playNow(arg),
         },
         loop: {
             description: "Toggles loop of the current song.",
-            triggers: [prefixify("loop"), prefixify("l")],
+            triggers: [Utils.prefixify("loop"), Utils.prefixify("l")],
             handler: (_arg) => this.toggleLoop(),
         },
         loopq: {
             description: "Toggles loop of the current queue.",
-            triggers: [prefixify("loopq"), prefixify("lq")],
+            triggers: [Utils.prefixify("loopq"), Utils.prefixify("lq")],
             handler: (_arg) => this.toggleLoopQueue(),
         },
         stash: {
-            description: `Stash the current queue away for later use. Run ${prefixify(
+            description: `Stash the current queue away for later use. Run ${Utils.prefixify(
                 "stash help"
             )} for further details`,
-            triggers: [prefixify("stash")],
+            triggers: [Utils.prefixify("stash")],
             handler: (arg) => this.stashController(arg),
         },
         shutup: {
             description: "The music bot will stop sending text messages.",
-            triggers: [prefixify("stfu"), prefixify("shutup")],
-            handler: (_arg) => this.shutup(),
+            triggers: [Utils.prefixify("stfu"), Utils.prefixify("shutup")],
+            handler: (_arg) => this.shutUp(),
         },
         speakagain: {
             description: "The bot will resume sending messages",
-            triggers: [prefixify("talk"), prefixify("speak")],
-            handler: (_arg) => this.unshutup(),
+            triggers: [Utils.prefixify("talk"), Utils.prefixify("speak")],
+            handler: (_arg) => this.unShutUp(),
+        },
+        clean: {
+            description: "Cleans the bots messages",
+            triggers: [Utils.prefixify("clean")],
+            handler: (_arg) => this.cleanMessages(),
         },
         quit: {
             description: "Quits the voice channel, and destroys the queue.",
-            triggers: [prefixify("quit"), prefixify("dc")],
+            triggers: [Utils.prefixify("quit"), Utils.prefixify("dc")],
             handler: (_arg) => this.quit(),
         },
     };
 
-    public readonly stashCommands: MusicPlayerCommandMap = {
+    public readonly stashCommands: Types.MusicPlayerCommandMap = {
         pop: {
             description:
                 "Use `stash pop {name}` to append the saved list with name `{name}`. For e.g `stash pop myList`",
@@ -195,27 +179,29 @@ class MusicPlayer {
         },
         view: {
             description:
-                "Use `stash view` to view all stashed playlists, and `stash view {name}` to view the playlist named `{name}`",
+                "Use `stash view *` to view all stashed playlists, and `stash view {name}` to view the playlist named `{name}`",
             triggers: ["view", "list"],
             handler: (arg) => this.stashView(arg),
         },
     };
 
     constructor({
-        text,
-        voice: { id, guildId },
-        adapter,
+        textChannel,
+        initialVoiceChannel: { id, guildId },
+        adapterCreator,
         onQuitCallback,
-    }: MusicPlayerArgs) {
-        this.messenger = new Messaging.Messenger(text);
+    }: Types.MusicPlayerArgs) {
+        this.messenger = new Messaging.Messenger(textChannel);
         this.guildId = guildId;
         this.onQuitCallback = onQuitCallback || (() => {});
         try {
-            joinVoiceChannel({
-                channelId: id,
-                guildId: this.guildId,
-                adapterCreator: adapter,
-            }).subscribe(this.player);
+            voice
+                .joinVoiceChannel({
+                    channelId: id,
+                    guildId: this.guildId,
+                    adapterCreator,
+                })
+                .subscribe(this.player);
         } catch (error) {
             console.error(error);
             this.messenger.send("Error connecting to the voice channel!");
@@ -223,13 +209,26 @@ class MusicPlayer {
         this.stashingAllowed = Stash.init();
     }
 
-    public async mainController(cmd: string, arg: string) {
+    private parser(content: string): [string, string] {
+        return [
+            Utils.removeLinkMarkdown(Utils.getCmd(content)),
+            Utils.removeLinkMarkdown(Utils.getArg(content)),
+        ];
+    }
+
+    private delegator(cmd: string, arg: string) {
         for (const command of Object.values(this.commands)) {
             if (command.triggers.includes(cmd)) {
-                command.handler(arg);
-                break;
+                return () => command.handler(arg);
             }
         }
+        return undefined;
+    }
+
+    public async controller(content: string) {
+        const [command, argument] = this.parser(content);
+        const handler = this.delegator(command, argument);
+        if (handler) handler();
     }
 
     private async help() {
@@ -246,18 +245,18 @@ class MusicPlayer {
 
     private async search(arg: string) {
         this.messenger.sendTyping();
-        const result = await searchYt(arg);
+        const result = await Searcher.keywordSearch(arg);
         if (!result.length) {
             this.messenger.send(`No songs found matching your query ${arg}`);
             return;
         }
         this.startSearchFlow(result);
         this.messenger.paginate(
-            paginatedListView(`Search for '${arg}'`, this.searchResult)
+            Views.paginatedView(`Search for '${arg}'`, this.searchResult)
         );
     }
 
-    private startSearchFlow(searchResult: Song[]) {
+    private startSearchFlow(searchResult: Types.Song[]) {
         [this.isInSearchFlow, this.searchResult] = [true, searchResult];
     }
 
@@ -271,7 +270,7 @@ class MusicPlayer {
             return;
         }
 
-        let newSongs: Song[] = [];
+        let newSongs: Types.Song[] = [];
         if (this.isInSearchFlow) {
             for (const pos of arg.split(" ")) {
                 const [possiblyFrom, possiblyTo] = pos
@@ -294,7 +293,7 @@ class MusicPlayer {
         }
 
         if (!newSongs.length) {
-            newSongs = await getSongs(arg);
+            newSongs = await Fetcher.controller(arg);
             if (!newSongs.length) {
                 this.messenger.send("Could not find song");
                 return;
@@ -302,12 +301,12 @@ class MusicPlayer {
         }
 
         this.songs.push(...newSongs);
-        if (this.player.state.status !== AudioPlayerStatus.Idle) {
+        if (this.player.state.status !== voice.AudioPlayerStatus.Idle) {
             if (newSongs.length > 1)
                 this.messenger.send(
                     `Added ${newSongs.length} songs to the queue`
                 );
-            else this.messenger.send(songView(newSongs[0]));
+            else this.messenger.send(Views.songView(newSongs[0]));
         }
 
         if (!this.started) this.initPlayer();
@@ -319,7 +318,7 @@ class MusicPlayer {
         const next = this.nextSong();
         if (next) this.playSong(next);
 
-        this.player.on(AudioPlayerStatus.Idle, () => {
+        this.player.on(voice.AudioPlayerStatus.Idle, () => {
             const next = this.nextSong();
             if (next) this.playSong(next);
             else this.quit();
@@ -343,20 +342,23 @@ class MusicPlayer {
         return next;
     }
 
-    private async playSong(song: Song) {
-        const audioResource = createAudioResource(await getStream(song), {
-            inputType: StreamType.Opus,
-        });
+    private async playSong(song: Types.Song) {
+        const audioResource = voice.createAudioResource(
+            await Streamer.controller(song.url),
+            {
+                inputType: voice.StreamType.Opus,
+            }
+        );
 
         this.player.play(audioResource);
         this.nowPlaying = {
             ...song,
-            elapsedTimer: new ElapsedTimer(song.duration),
+            elapsedTimer: new Timer.ElapsedTimer(song.duration),
         };
         this.showNp();
     }
     private async pause() {
-        if (this.player.state.status === AudioPlayerStatus.Playing) {
+        if (this.player.state.status === voice.AudioPlayerStatus.Playing) {
             this.player.pause();
             this.nowPlaying?.elapsedTimer.pause();
             this.messenger.send("Paused");
@@ -366,7 +368,7 @@ class MusicPlayer {
     }
 
     private async resume() {
-        if (this.player.state.status === AudioPlayerStatus.Paused) {
+        if (this.player.state.status === voice.AudioPlayerStatus.Paused) {
             this.player.unpause();
             this.nowPlaying?.elapsedTimer.play();
         } else {
@@ -396,7 +398,9 @@ class MusicPlayer {
             } else {
                 toRemove.push(idx);
                 this.messenger.send(
-                    `Removed ${mdHyperlinkSong(this.songs[idx])} from the queue`
+                    `Removed ${Utils.mdHyperlinkSong(
+                        this.songs[idx]
+                    )} from the queue`
                 );
             }
         }
@@ -445,7 +449,7 @@ class MusicPlayer {
         const song = this.songs.splice(from, 1)[0];
         this.songs.splice(to, 0, song);
         this.messenger.send(
-            `Moving ${mdHyperlinkSong(song)} to position ${to + 1}`
+            `Moving ${Utils.mdHyperlinkSong(song)} to position ${to + 1}`
         );
     }
 
@@ -496,7 +500,7 @@ class MusicPlayer {
             } else {
                 toKeep.push(idx);
                 this.messenger.send(
-                    `Keeping ${mdHyperlinkSong(this.songs[idx])}`
+                    `Keeping ${Utils.mdHyperlinkSong(this.songs[idx])}`
                 );
             }
         }
@@ -545,7 +549,7 @@ class MusicPlayer {
 
     private async playNow(arg: string) {
         try {
-            const newSongs = await getSongs(arg);
+            const newSongs = await Fetcher.controller(arg);
 
             if (newSongs.length) {
                 this.songs.unshift(...newSongs);
@@ -572,11 +576,13 @@ class MusicPlayer {
         if (this.nowPlaying) {
             if (this.shouldLoopSong)
                 this.messenger.send(
-                    `Looping ${mdHyperlinkSong(this.nowPlaying)}`
+                    `Looping ${Utils.mdHyperlinkSong(this.nowPlaying)}`
                 );
             else
                 this.messenger.send(
-                    `Cancelled loop on ${mdHyperlinkSong(this.nowPlaying)}`
+                    `Cancelled loop on ${Utils.mdHyperlinkSong(
+                        this.nowPlaying
+                    )}`
                 );
         } else {
             this.messenger.send("There is nothing playing");
@@ -588,7 +594,7 @@ class MusicPlayer {
             this.messenger.send("Stashing is not possible right now, Sorry!");
             return;
         }
-        const [subcmd, arg] = [getCmd(_arg), getArg(_arg)];
+        const [subcmd, arg] = [Utils.getCmd(_arg), Utils.getArg(_arg)];
         if (subcmd === "help") {
             this.stashHelp();
             return;
@@ -620,7 +626,7 @@ class MusicPlayer {
             this.invalid();
             return;
         }
-        const stored = (await Stash.pop(this.guildId, arg)) as Song[]; // TODO: make JSON compile-time guaranteed type
+        const stored = (await Stash.pop(this.guildId, arg)) as Types.Song[];
         if (stored) {
             this.songs.push(...stored);
             if (!this.started) {
@@ -640,7 +646,7 @@ class MusicPlayer {
             this.invalid();
             return;
         }
-        let toBeStored: Song[] = [];
+        let toBeStored: Types.Song[] = [];
         if (scope === "*") {
             toBeStored = this.songs.slice();
         } else {
@@ -693,21 +699,23 @@ class MusicPlayer {
         }
     }
 
-    private showStashItem(name: string, list: Song[]) {
+    private showStashItem(name: string, list: Types.Song[]) {
         const revealLimit = 10;
         const nameText = `**${name}**`;
         const listText = list
             .slice(0, revealLimit)
-            .map((song, idx) => `**${idx + 1}.** ${mdHyperlinkSong(song)}`)
+            .map(
+                (song, idx) => `**${idx + 1}.** ${Utils.mdHyperlinkSong(song)}`
+            )
             .join("\n");
-        const remaining = clampAtZero(list.length - revealLimit);
+        const remaining = Utils.clampAtZero(list.length - revealLimit);
         const footerText = remaining > 0 ? `...and ${remaining} more` : "";
         this.messenger.send([nameText, listText, footerText].join("\n"));
     }
 
     private async showQueue() {
         if (this.songs.length) {
-            this.messenger.paginate(paginatedListView("Queue", this.songs));
+            this.messenger.paginate(Views.paginatedView("Queue", this.songs));
         } else {
             this.messenger.send("There is nothing queued!");
         }
@@ -715,26 +723,33 @@ class MusicPlayer {
 
     private async showNp() {
         if (this.nowPlaying) {
-            this.messenger.send(nowPlayingView(this.nowPlaying));
+            this.messenger.send(Views.nowPlayingView(this.nowPlaying));
         } else {
             this.messenger.send("There is nothing playing right now");
         }
     }
 
-    private async shutup() {
-        this.silence = true;
+    private async shutUp() {
+        this.messenger.shouldBeSilent = true;
     }
 
-    private async unshutup() {
-        this.silence = false;
+    private async unShutUp() {
+        this.messenger.shouldBeSilent = false;
     }
 
     private async invalid() {
         this.messenger.send("Invalid Command");
     }
 
+    private async cleanMessages() {
+        await this.messenger.send("Cleaning messages...");
+        const musicCommandRecognizer = (content: string) =>
+            !!this.delegator(...this.parser(content));
+        this.messenger.clean(musicCommandRecognizer);
+    }
+
     private async quit() {
-        const con = getVoiceConnection(this.guildId);
+        const con = voice.getVoiceConnection(this.guildId);
         if (con) {
             this.messenger.send("_Disconnecting..._");
             con.disconnect();

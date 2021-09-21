@@ -1,8 +1,4 @@
-import {
-    padZeros,
-    durationToMs,
-    millisecToHhMmSs,
-} from "./Utils";
+import * as Utils from "../../common/Utils";
 
 export class ElapsedTimer {
     private elapsedMs = 0;
@@ -11,7 +7,7 @@ export class ElapsedTimer {
     private total = 0;
     constructor(duration: string) {
         this.play();
-        this.total = durationToMs(duration);
+        this.total = Utils.durationToMs(duration);
     }
 
     private update() {
@@ -30,6 +26,6 @@ export class ElapsedTimer {
     }
 
     get elapsed() {
-        return padZeros(millisecToHhMmSs(this.elapsedMs));
+        return Utils.padZeros(Utils.millisecToDuration(this.elapsedMs));
     }
 }

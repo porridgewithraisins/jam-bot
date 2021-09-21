@@ -1,73 +1,13 @@
-import {
-    Message,
-    MessageActionRow,
-    MessageActionRowOptions,
-    MessageComponentInteraction,
-    MessageEmbed,
-    TextBasedChannels,
-    TextChannel,
-} from "discord.js";
-import { mod } from "./Utils";
-import { textView } from "./Views";
-
-export class Messenger {
-    private pastMessages: Promise<Message>[] = [];
-    private shouldBeSilent = false;
-    constructor(private to: TextBasedChannels | Message) {}
-
-    public send(
-        embedOrEmbedsOrString: string | MessageEmbed | MessageEmbed[],
-        componentOrComponents?:
-            | (MessageActionRow | MessageActionRowOptions)
-            | (MessageActionRow | MessageActionRowOptions)[]
-    ): Promise<Message> {
-        let embeds;
-        if (embedOrEmbedsOrString instanceof Array) {
-            embeds = embedOrEmbedsOrString;
-        } else if (typeof embedOrEmbedsOrString === "string") {
-            embeds = [textView(embedOrEmbedsOrString)];
-        } else {
-            embeds = [embedOrEmbedsOrString];
-        }
-
-        let components;
-        if (componentOrComponents === undefined)
-            components = componentOrComponents;
-        else if (componentOrComponents instanceof Array) {
-            components = componentOrComponents;
-        } else {
-            components = [componentOrComponents];
-        }
-
-        if (this.to instanceof Message) {
-            const msg = this.to.reply({ embeds, components });
-            this.pastMessages.push(msg);
-            return msg;
-        } else {
-            const msg = this.to.send({ embeds, components });
-            this.pastMessages.push(msg);
-            return msg;
-        }
-    }
-    public paginate(pages: MessageEmbed[]) {
-        if (this.to instanceof TextChannel)
-            new PaginatedInteractor(this.to, pages).paginate();
-        else throw new Error("Cannot paginate in a reply");
-    }
-
-    public toggleSilence() {
-        this.shouldBeSilent = !this.shouldBeSilent;
-    }
-
-    public sendTyping() {
-        if (this.to instanceof TextChannel) this.to.sendTyping();
-    }
-}
+import * as discordJs from "discord.js";
+import * as Utils from "../../common/Utils";
 
 export class PaginatedInteractor {
     private currentPage = 0;
 
-    constructor(private to: TextBasedChannels, private pages: MessageEmbed[]) {}
+    constructor(
+        private to: discordJs.TextBasedChannels,
+        private pages: discordJs.MessageEmbed[]
+    ) {}
 
     async paginate() {
         const msg = await this.to.send({
@@ -115,7 +55,11 @@ export class PaginatedInteractor {
 
         setTimeout(() => {
             collector.stop("Timeout");
-            msg.edit({ components: [] });
+            this.currentPage = 0;
+            msg.edit({
+                embeds: [this.pages[this.currentPage]],
+                components: [],
+            });
         }, 150_000);
 
         collector.on("collect", async (interaction) => {
@@ -126,14 +70,14 @@ export class PaginatedInteractor {
                     this.update(interaction);
                     break;
                 case "◀️":
-                    this.currentPage = mod(
+                    this.currentPage = Utils.mod(
                         this.currentPage - 1,
                         this.pages.length
                     );
                     this.update(interaction);
                     break;
                 case "▶️":
-                    this.currentPage = mod(
+                    this.currentPage = Utils.mod(
                         this.currentPage + 1,
                         this.pages.length
                     );
@@ -145,9 +89,10 @@ export class PaginatedInteractor {
                     break;
             }
         });
+        return msg;
     }
 
-    private async update(interaction: MessageComponentInteraction) {
+    private async update(interaction: discordJs.MessageComponentInteraction) {
         await interaction.update({
             embeds: [
                 this.pages[this.currentPage].setFooter(

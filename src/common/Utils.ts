@@ -1,4 +1,6 @@
-import { getConfig } from "./Config";
+import * as ytdlCoreDiscord from "ytdl-core-discord";
+import * as Config from "../config/Config";
+import * as Types from "./Types";
 
 export const getArg = (content: string) =>
     content.split(" ").slice(1).join(" ").trim();
@@ -11,7 +13,7 @@ export const removeLinkMarkdown = (content: string) => {
     return content;
 };
 
-export const prefixify = (text: string) => getConfig().prefix + text;
+export const prefixify = (text: string) => Config.getConfig().prefix + text;
 
 export const mdHyperlinkSong = ({
     title,
@@ -29,7 +31,7 @@ export const durationToMs = (duration: string) => {
     return (tokens[0] * 3600 + tokens[1] * 60 + tokens[2]) * 1000;
 };
 
-export const millisecToHhMmSs = (ms: number) => {
+export const millisecToDuration = (ms: number) => {
     let time = Math.floor(ms / 1000);
     const ss = time % 60;
     time = Math.floor(time / 60);
@@ -69,4 +71,20 @@ export const padZeros = (duration: string) => {
     const tokens = duration.split(":").map((x) => parseInt(x));
     if (tokens.some(isNaN)) return duration;
     return tokens.map((x: number) => ("0" + x).slice(-2)).join(":");
+};
+
+export const getSource = (url: string): Types.SongSource => {
+    if (ytdlCoreDiscord.validateURL(url)) return "youtube";
+    if (/[&?]list=([a-z0-9_]+)/i.exec(url)) return "youtube-playlist";
+    return "youtube-search";
+};
+
+export const prependHttp = (url: string, https = true) => {
+    url = url.trim();
+
+    if (/^\.*\/|^(?!localhost)\w+?:/.test(url)) {
+        return url;
+    }
+
+    return url.replace(/^(?!(?:\w+?:)?\/\/)/, https ? "https://" : "http://");
 };

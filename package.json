@@ -20,7 +20,7 @@
     },
     "scripts": {
         "build": "tsc",
-        "prepublish": "tsc && cp package.json bin && cp README.md bin",
+        "prepublish": "tsc && cp package.json bin && cp README.md bin && cd bin && json -I -f package.json -e 'this.main = \"./Jambot.js\"; this.typings = \"./Jambot\"' && cd ..",
         "test": "tsc && node sample.js"
     },
     "dependencies": {
