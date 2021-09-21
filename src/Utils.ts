@@ -1,5 +1,4 @@
 import { getConfig } from "./Config";
-import { Song } from "./Types";
 
 export const getArg = (content: string) =>
     content.split(" ").slice(1).join(" ").trim();
@@ -13,8 +12,6 @@ export const removeLinkMarkdown = (content: string) => {
 };
 
 export const prefixify = (text: string) => getConfig().prefix + text;
-
-export const padOneZero = (x: number) => ("0" + x).slice(-2);
 
 export const mdHyperlinkSong = ({
     title,
@@ -39,7 +36,7 @@ export const millisecToHhMmSs = (ms: number) => {
     const mm = time % 60;
     time = Math.floor(time / 60);
     const hh = time % 60;
-    return (hh ? [hh, mm, ss] : [mm, ss]).join(':');
+    return (hh ? [hh, mm, ss] : [mm, ss]).join(":");
 };
 
 export const removeTopicAtEnd = (artist: string) => {
@@ -68,8 +65,8 @@ export const coerceSize = (str: string, n: number) => {
     return str;
 };
 
-export const cleanDuration = (duration: string) => {
+export const padZeros = (duration: string) => {
     const tokens = duration.split(":").map((x) => parseInt(x));
     if (tokens.some(isNaN)) return duration;
-    return tokens.map(padOneZero).join(":");
+    return tokens.map((x: number) => ("0" + x).slice(-2)).join(":");
 };

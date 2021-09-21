@@ -4,7 +4,7 @@ import {
     mdHyperlinkSong,
     removeTopicAtEnd,
     coerceSize,
-    cleanDuration,
+    padZeros,
 } from "./Utils";
 
 const baseEmbed = () => {
@@ -34,7 +34,7 @@ export const nowPlayingView = ({
         .setURL(url)
         .addField(
             "Elapsed",
-            `${elapsedTimer.elapsed}/${cleanDuration(duration)}`
+            `${elapsedTimer.elapsed}/${padZeros(duration)}`
         )
         .setThumbnail(thumbnail || "styled J");
 

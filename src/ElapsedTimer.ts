@@ -1,5 +1,5 @@
 import {
-    cleanDuration,
+    padZeros,
     durationToMs,
     millisecToHhMmSs,
 } from "./Utils";
@@ -30,6 +30,6 @@ export class ElapsedTimer {
     }
 
     get elapsed() {
-        return cleanDuration(millisecToHhMmSs(this.elapsedMs));
+        return padZeros(millisecToHhMmSs(this.elapsedMs));
     }
 }
