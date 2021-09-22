@@ -7,7 +7,8 @@ recently taken-down bots like Rythm and Groovy.
 
 https://www.npmjs.com/package/jambot
 
-&ensp;
+<br>
+<br>
 
 ## Prerequisites
 
