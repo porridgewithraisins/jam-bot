@@ -14,16 +14,15 @@ const client = new discordJs.Client({
     ],
 });
 export function init(config: Types.Config) {
-    client.user?.setAvatar("assets/jambot.jpg");
     Config.setConfig(config);
     if (config.logPerformance)
         setInterval(() => console.log(process.resourceUsage()), 600_000);
 
     client.login(Config.getConfig().token);
 
-    client.on("ready", async () => console.log("ready"));
+    client.on("ready", onReady);
 
-    client.on("messageCreate", messageHandler);
+    client.on("messageCreate", onMessage);
 }
 
 type GuildID = string;
@@ -33,7 +32,12 @@ const MusicPlayers = new discordJs.Collection<
     MusicPlayer.MusicPlayer
 >();
 
-const messageHandler = async (message: discordJs.Message) => {
+const onReady = async (client: discordJs.Client) => {
+    await client.user?.setAvatar("assets/jambot.jpg");
+    console.log("JamBot is ready to go!");
+};
+
+const onMessage = async (message: discordJs.Message) => {
     if (
         !message.content.startsWith(Config.getConfig().prefix) ||
         message.author.bot ||
