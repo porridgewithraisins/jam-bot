@@ -41,7 +41,8 @@ export class MusicPlayer {
         },
         play: {
             description:
-                "`play [song name/url]`. Don't specify any song, to resume a paused song",
+                "`play [song name/url]`. Don't specify any song, to resume a\
+                 paused song",
             triggers: [Utils.prefixify("p"), Utils.prefixify("play")],
             handler: (arg) => this.play(arg),
         },
@@ -67,37 +68,44 @@ export class MusicPlayer {
         },
         move: {
             description:
-                "Use `queue` to find out the position of the songs you want to move, and then use it like `move [from_position] [to_position]`",
+                "Use `queue` to find out the position of the songs you want to \
+                move, and then use it like `move [from_position] [to_position]`",
             triggers: [Utils.prefixify("m"), Utils.prefixify("move")],
             handler: (arg) => this.move(arg),
         },
         moverange: {
             description:
-                "Moves a range of the queue. For example, `moverange 1-3 7` moves songs at position 1,2,3 in the queue to position 7",
+                "Moves a range of the queue. For example, `moverange 1-3 7` \
+                moves songs at position 1,2,3 in the queue to position 7",
             triggers: [Utils.prefixify("mr"), Utils.prefixify("moverange")],
             handler: (arg) => this.moveRange(arg),
         },
         remove: {
             description:
-                "Use `queue` to find the position(s) of the song(s) you want to remove, and call `remove [position1] [position2] ...`.",
+                "Use `queue` to find the position(s) of the song(s) you want to\
+                 remove, and call `remove [position1] [position2] ...`.",
             triggers: [Utils.prefixify("remove"), Utils.prefixify("r")],
             handler: (arg) => this.remove(arg),
         },
         removerange: {
             description:
-                "Removes specified range(s) from the queue. For example, `removerange 1-3 4-6` removes songs at positions 1,2,3 and 4,5,6 in the queue",
+                "Removes specified range(s) from the queue. For example, \
+                `removerange 1-3 4-6` removes songs at positions 1,2,3 and 4,5,6 in the queue",
             triggers: [Utils.prefixify("removerange"), Utils.prefixify("rr")],
             handler: (arg) => this.removeRange(arg),
         },
         keep: {
             description:
-                "Opposite of remove. For example, `keep 1 3` keeps the specified positions 1,3,...in the queue, and discards the rest.",
+                "Opposite of `remove`. For example, `keep 1 3` keeps the \
+                specified positions 1,3,...in the queue, and discards the rest.",
             triggers: [Utils.prefixify("keep"), Utils.prefixify("k")],
             handler: (arg) => this.keep(arg),
         },
         keeprange: {
             description:
-                "Opposite of removerange. Keeps specified range(s) from the queue. For example, `keeprange 1-3 4-6` keeps songs at positions 1,2,3 and 4,5,6 and discards the rest",
+                "Opposite of removerange. Keeps specified range(s) from the \
+                queue. For example, `keeprange 1-3 4-6` keeps songs at \
+                positions 1,2,3 and 4,5,6 and discards the rest",
             triggers: [Utils.prefixify("keeprange"), Utils.prefixify("kr")],
             handler: (arg) => this.keepRange(arg),
         },
@@ -108,13 +116,16 @@ export class MusicPlayer {
         },
         skipto: {
             description:
-                "skipto [index] skips to the position in the queue, forgetting all the songs before it",
+                "skipto [index] skips to the position in the queue, forgetting\
+                 all the songs before it",
             triggers: [Utils.prefixify("skipto")],
             handler: (arg) => this.skipto(arg),
         },
         playnow: {
             description:
-                "playnow [song name/url] plays the song immediately on the top of the queue, the rest of the queue remains intact and will play next",
+                "playnow [song name/url] plays the song immediately on the top\
+                 of the queue, the rest of the queue remains intact and will \
+                 play next",
             triggers: [Utils.prefixify("playnow"), Utils.prefixify("pn")],
             handler: (arg) => this.playNow(arg),
         },
@@ -129,9 +140,8 @@ export class MusicPlayer {
             handler: (_arg) => this.toggleLoopQueue(),
         },
         stash: {
-            description: `Stash the current queue away for later use. Run ${Utils.prefixify(
-                "stash help"
-            )} for further details`,
+            description: `Stash the current queue away for later use. Run \
+            ${Utils.prefixify("stash help")} for further details`,
             triggers: [Utils.prefixify("stash")],
             handler: (arg) => this.stashController(arg),
         },
@@ -160,26 +170,31 @@ export class MusicPlayer {
     public readonly stashCommands: Types.MusicPlayerCommandMap = {
         pop: {
             description:
-                "Use `stash pop {name}` to append the saved list with name `{name}`. For e.g `stash pop myList`",
+                "Use `stash pop {name}` to append the saved list with name \
+                `{name}`. For e.g `stash pop myList`",
             triggers: ["pop", "get"],
             handler: (arg) => this.stashPop(arg),
         },
         push: {
             description:
-                "Use `stash push * {name}` to store the whole of the current queue as `{name}`. For e.g `stash push * mylist`. Moreover, `stash push {from}-{to}\
-                {name}` stores items from positions {from} to {to} as {name}",
+                "Use `stash push * {name}` to store the whole of the current \
+                queue as `{name}`. For e.g `stash push * mylist`. Moreover, \
+                `stash push {from}-{to} {name}` stores items from positions \
+                {from} to {to} as {name}",
             triggers: ["push", "add", "new"],
             handler: (arg) => this.stashPush(arg),
         },
         drop: {
             description:
-                "Use `stash drop {name}` to delete the saved list with name `{name}`. For e.g, `stash drop myList`",
+                "Use `stash drop {name}` to delete the saved list with name \
+                `{name}`. For e.g, `stash drop myList`",
             triggers: ["drop", "del", "delete"],
             handler: (arg) => this.stashDrop(arg),
         },
         view: {
             description:
-                "Use `stash view *` to view all stashed playlists, and `stash view {name}` to view the playlist named `{name}`",
+                "Use `stash view *` to view all stashed playlists, and `stash\
+                 view {name}` to view the playlist named `{name}`",
             triggers: ["view", "list"],
             handler: (arg) => this.stashView(arg),
         },
@@ -344,10 +359,7 @@ export class MusicPlayer {
 
     private async playSong(song: Types.Song) {
         const audioResource = voice.createAudioResource(
-            await Streamer.controller(song.url),
-            {
-                inputType: voice.StreamType.Opus,
-            }
+            await Streamer.controller(song.url)
         );
 
         this.player.play(audioResource);

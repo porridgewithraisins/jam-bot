@@ -1,3 +1,4 @@
+import * as Assets from "../common/Assets";
 import * as Types from "../common/Types";
 import * as Utils from "../common/Utils";
 import * as Base from "./Base";
@@ -17,4 +18,4 @@ export const view = ({
             "Elapsed",
             `${elapsedTimer.elapsed}/${Utils.padZeros(duration)}`
         )
-        .setThumbnail(thumbnail || "styled J");
+        .setThumbnail(thumbnail || Assets.logoURL);

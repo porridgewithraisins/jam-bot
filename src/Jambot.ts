@@ -13,12 +13,12 @@ const client = new discordJs.Client({
         discordJs.Intents.FLAGS.GUILD_VOICE_STATES,
     ],
 });
-
 export function init(config: Types.Config) {
+    client.user?.setAvatar("assets/jambot.jpg");
     Config.setConfig(config);
     if (config.logPerformance)
         setInterval(() => console.log(process.resourceUsage()), 600_000);
-    
+
     client.login(Config.getConfig().token);
 
     client.on("ready", async () => console.log("ready"));

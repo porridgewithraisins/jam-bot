@@ -19,9 +19,8 @@
         "type": "git"
     },
     "scripts": {
-        "build": "tsc",
-        "prepublish": "tsc && cp package.json bin && cp README.md bin && cd bin && json -I -f package.json -e 'this.main = \"./Jambot.js\"; this.typings = \"./Jambot\"' && cd ..",
-        "test": "tsc && node sample.js"
+        "dist": "./scripts/dist.sh",
+        "test": "npm run dist && node bot.js"
     },
     "dependencies": {
         "@discordjs/voice": "^0.6.0",
@@ -36,6 +35,7 @@
     },
     "devDependencies": {
         "@types/node": "^16.9.1",
+        "json": "^11.0.0",
         "ts-node": "^10.2.1",
         "typescript": "^4.4.3"
     }
