@@ -26,7 +26,6 @@ Add your Client ID and Client Secret as fields in the `config.json`
 
 ```json
 {
-    //...
     "spotify": {
         "clientId": "your_spotify_client_id",
         "clientSecret": "your_spotify_client_secret"
@@ -81,7 +80,6 @@ JamBot can also play audio files stored locally in your computer!
 
 ```json
 {
-    //...
     "localFolder": ["/home/me/Music", "/home/me/Concert"]
 }
 ```
@@ -104,7 +102,6 @@ _Level 3_: Log execution of every intermediate service and function.
 
 ```json
 {
-    //...
     "logLevel": 2,
     "logPerformance": true
 }
