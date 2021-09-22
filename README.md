@@ -1,14 +1,11 @@
-<img align = "left" height = "250px" src="assets/jambot.jpg">
+<img style = "display:block; margin:auto" height = 300px src="assets/jambot.jpg"/>
 
-<h1> JamBot </h1>
+<h1 align = "center"> JamBot </h1>
 
 A self-hosted Discord music bot. Aims to be a feature-compatible replacement for
 recently taken-down bots like Rythm and Groovy.
 
 https://www.npmjs.com/package/jambot
-
-<br>
-<br>
 
 ## Prerequisites
 
