@@ -1,4 +1,6 @@
-<img style = "display:block; margin:auto" height = 300px src="assets/jambot.jpg"/>
+<p align="center" width="100%">
+    <img height = "300px" src="assets/jambot.jpg"> 
+</p>
 
 <h1 align = "center"> JamBot </h1>
 
