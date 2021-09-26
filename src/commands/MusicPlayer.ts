@@ -1,216 +1,198 @@
-import * as voice from "@discordjs/voice";
+import * as discordJSVoice from "@discordjs/voice";
 import * as Utils from "../common/Utils";
-import * as Types from "../common/Types";
-import * as Stash from "../services/stasher/Stash";
-import * as Timer from "../services/timer/Timer";
-import * as Views from "../views/Views";
-import * as Messaging from "../services/interaction/Messaging";
-import * as Searcher from "../services/searchers/Searcher";
-import * as Fetcher from "../services/fetchers/Fetcher";
-import * as Streamer from "../services/streamers/Streamer";
+import * as Stash from "../services/Stash";
+import * as Timer from "../services/Timer";
+import * as Views from "../services/Views";
+import * as Messaging from "../services/Messaging";
+import * as Searcher from "../services/Searcher";
+import * as Fetcher from "../services/Fetcher";
+import * as Streamer from "../services/Streamer";
+import * as discordJs from "discord.js";
+import { Song, NowPlaying, MusicPlayerArgs } from "../common/Types";
+import { configObj } from "../config/Config";
+import { convertInfoToYoutube } from "../services/toYoutube";
+
+interface Command {
+    triggers: string[];
+    handler: (arg: string) => Promise<void>;
+    exclusiveTo?: string[];
+}
+
+export type RecognizedCommands = typeof MusicPlayer.MusicPlayerCommands[number];
 
 export class MusicPlayer {
-    private readonly player: voice.AudioPlayer = voice.createAudioPlayer();
+    private readonly player = discordJSVoice.createAudioPlayer();
     private readonly guildId: string;
+    public readonly TextChannelForGuild: discordJs.TextBasedChannels;
     private readonly messenger: Messaging.Messenger;
+    private stashingAllowed = false;
 
     //State variables
     private started = false;
-    private songs: Types.Song[] = [];
-    private nowPlaying: Types.NowPlaying | undefined;
+    private songs: Song[] = [];
+    private nowPlaying: NowPlaying | undefined;
     private isInSearchFlow = false;
-    private searchResult: Types.Song[] = [];
+    private searchResult: Song[] = [];
     private shouldLoopSong = false;
     private shouldLoopQueue = false;
-    private stashingAllowed = false;
     //State variables
 
     private readonly onQuitCallback: () => any;
 
-    public readonly commands: Types.MusicPlayerCommandMap = {
-        help: {
-            description: "Show this help message",
-            triggers: [Utils.prefixify("h"), Utils.prefixify("help")],
-            handler: (_arg) => this.help(),
-        },
+    public static MusicPlayerCommands = [
+        "search",
+        "play",
+        "lofi",
+        "restart",
+        "pause",
+        "nowplaying",
+        "skip",
+        "queue",
+        "move",
+        "moverange",
+        "remove",
+        "removerange",
+        "keep",
+        "keeprange",
+        "clear",
+        "skipto",
+        "playnow",
+        "loop",
+        "loopq",
+        "shutup",
+        "speakagain",
+        "clean",
+        "quit",
+        "stash pop",
+        "stash push",
+        "stash drop",
+        "stash view",
+    ] as const;
+
+    private commands: Record<RecognizedCommands, Command> = {
         search: {
-            description:
-                "Search for a song, and then choose a position in it, to play",
-            triggers: [Utils.prefixify("search")],
             handler: (arg) => this.search(arg),
+            triggers: ["search"].map(Utils.prefixify),
         },
         play: {
-            description:
-                "`play [song name/url]`. Don't specify any song, to resume a\
-                 paused song",
-            triggers: [Utils.prefixify("p"), Utils.prefixify("play")],
             handler: (arg) => this.play(arg),
+            triggers: ["p", "play"].map(Utils.prefixify),
+        },
+        lofi: {
+            handler: (arg) => this.lofi(arg),
+            triggers: ["lofi"].map(Utils.prefixify),
+        },
+        restart: {
+            handler: (arg) => this.restart(),
+            triggers: ["restart"].map(Utils.prefixify),
         },
         pause: {
-            description: "Pause the currently playing song.",
-            triggers: [Utils.prefixify("pause"), Utils.prefixify("stop")],
             handler: (_arg) => this.pause(),
+            triggers: ["pause", "stop"].map(Utils.prefixify),
         },
-        np: {
-            description: "Show the currently playing song",
-            triggers: [Utils.prefixify("np"), Utils.prefixify("nowplaying")],
+        nowplaying: {
             handler: (_arg) => this.showNp(),
+            triggers: ["np", "nowplaying"].map(Utils.prefixify),
         },
         skip: {
-            description: "Skip the current song in the queue",
-            triggers: [Utils.prefixify("s"), Utils.prefixify("skip")],
             handler: (_arg) => this.skip(),
+            triggers: ["s", "skip"].map(Utils.prefixify),
         },
         queue: {
-            description: "Show the current queue",
-            triggers: [Utils.prefixify("q"), Utils.prefixify("queue")],
             handler: (_arg) => this.showQueue(),
+            triggers: ["q", "queue"].map(Utils.prefixify),
         },
         move: {
-            description:
-                "Use `queue` to find out the position of the songs you want to \
-                move, and then use it like `move [from_position] [to_position]`",
-            triggers: [Utils.prefixify("m"), Utils.prefixify("move")],
             handler: (arg) => this.move(arg),
+            triggers: ["m", "move"].map(Utils.prefixify),
         },
         moverange: {
-            description:
-                "Moves a range of the queue. For example, `moverange 1-3 7` \
-                moves songs at position 1,2,3 in the queue to position 7",
-            triggers: [Utils.prefixify("mr"), Utils.prefixify("moverange")],
             handler: (arg) => this.moveRange(arg),
+            triggers: ["mr", "moverange"].map(Utils.prefixify),
         },
         remove: {
-            description:
-                "Use `queue` to find the position(s) of the song(s) you want to\
-                 remove, and call `remove [position1] [position2] ...`.",
-            triggers: [Utils.prefixify("remove"), Utils.prefixify("r")],
             handler: (arg) => this.remove(arg),
+            triggers: ["remove", "r"].map(Utils.prefixify),
         },
         removerange: {
-            description:
-                "Removes specified range(s) from the queue. For example, \
-                `removerange 1-3 4-6` removes songs at positions 1,2,3 and 4,5,6 in the queue",
-            triggers: [Utils.prefixify("removerange"), Utils.prefixify("rr")],
             handler: (arg) => this.removeRange(arg),
+            triggers: ["removerange", "rr"].map(Utils.prefixify),
         },
         keep: {
-            description:
-                "Opposite of `remove`. For example, `keep 1 3` keeps the \
-                specified positions 1,3,...in the queue, and discards the rest.",
-            triggers: [Utils.prefixify("keep"), Utils.prefixify("k")],
             handler: (arg) => this.keep(arg),
+            triggers: ["keep", "k"].map(Utils.prefixify),
         },
         keeprange: {
-            description:
-                "Opposite of removerange. Keeps specified range(s) from the \
-                queue. For example, `keeprange 1-3 4-6` keeps songs at \
-                positions 1,2,3 and 4,5,6 and discards the rest",
-            triggers: [Utils.prefixify("keeprange"), Utils.prefixify("kr")],
             handler: (arg) => this.keepRange(arg),
+            triggers: ["keeprange", "kr"].map(Utils.prefixify),
         },
         clear: {
-            description: "Clears the current queue",
-            triggers: [Utils.prefixify("clear"), Utils.prefixify("clr")],
             handler: (_arg) => this.clear(),
+            triggers: ["clear", "clr"].map(Utils.prefixify),
         },
         skipto: {
-            description:
-                "skipto [index] skips to the position in the queue, forgetting\
-                 all the songs before it",
-            triggers: [Utils.prefixify("skipto")],
             handler: (arg) => this.skipto(arg),
+            triggers: ["skipto"].map(Utils.prefixify),
         },
         playnow: {
-            description:
-                "playnow [song name/url] plays the song immediately on the top\
-                 of the queue, the rest of the queue remains intact and will \
-                 play next",
-            triggers: [Utils.prefixify("playnow"), Utils.prefixify("pn")],
             handler: (arg) => this.playNow(arg),
+            triggers: ["playnow", "pn"].map(Utils.prefixify),
         },
         loop: {
-            description: "Toggles loop of the current song.",
-            triggers: [Utils.prefixify("loop"), Utils.prefixify("l")],
             handler: (_arg) => this.toggleLoop(),
+            triggers: ["loop", "l"].map(Utils.prefixify),
         },
         loopq: {
-            description: "Toggles loop of the current queue.",
-            triggers: [Utils.prefixify("loopq"), Utils.prefixify("lq")],
             handler: (_arg) => this.toggleLoopQueue(),
-        },
-        stash: {
-            description: `Stash the current queue away for later use. Run \
-            ${Utils.prefixify("stash help")} for further details`,
-            triggers: [Utils.prefixify("stash")],
-            handler: (arg) => this.stashController(arg),
+            triggers: ["loopq", "lq"].map(Utils.prefixify),
         },
         shutup: {
-            description: "The music bot will stop sending text messages.",
-            triggers: [Utils.prefixify("stfu"), Utils.prefixify("shutup")],
             handler: (_arg) => this.shutUp(),
+            triggers: ["stfu", "shutup"].map(Utils.prefixify),
         },
         speakagain: {
-            description: "The bot will resume sending messages",
-            triggers: [Utils.prefixify("talk"), Utils.prefixify("speak")],
             handler: (_arg) => this.unShutUp(),
+            triggers: ["talk", "speak"].map(Utils.prefixify),
         },
         clean: {
-            description: "Cleans the bots messages",
-            triggers: [Utils.prefixify("clean")],
             handler: (_arg) => this.cleanMessages(),
+            triggers: ["clean"].map(Utils.prefixify),
         },
         quit: {
-            description: "Quits the voice channel, and destroys the queue.",
-            triggers: [Utils.prefixify("quit"), Utils.prefixify("dc")],
             handler: (_arg) => this.quit(),
+            triggers: ["quit", "dc"].map(Utils.prefixify),
         },
-    };
-
-    public readonly stashCommands: Types.MusicPlayerCommandMap = {
-        pop: {
-            description:
-                "Use `stash pop {name}` to append the saved list with name \
-                `{name}`. For e.g `stash pop myList`",
-            triggers: ["pop", "get"],
-            handler: (arg) => this.stashPop(arg),
+        ["stash pop"]: {
+            handler: (arg) => this.stashController("pop", arg),
+            triggers: ["stash pop", "stash get"].map(Utils.prefixify),
         },
-        push: {
-            description:
-                "Use `stash push * {name}` to store the whole of the current \
-                queue as `{name}`. For e.g `stash push * mylist`. Moreover, \
-                `stash push {from}-{to} {name}` stores items from positions \
-                {from} to {to} as {name}",
-            triggers: ["push", "add", "new"],
-            handler: (arg) => this.stashPush(arg),
+        ["stash push"]: {
+            handler: (arg) => this.stashController("push", arg),
+            triggers: ["stash push", "stash add"].map(Utils.prefixify),
         },
-        drop: {
-            description:
-                "Use `stash drop {name}` to delete the saved list with name \
-                `{name}`. For e.g, `stash drop myList`",
-            triggers: ["drop", "del", "delete"],
-            handler: (arg) => this.stashDrop(arg),
+        ["stash drop"]: {
+            handler: (arg) => this.stashController("drop", arg),
+            triggers: ["stash drop"].map(Utils.prefixify),
         },
-        view: {
-            description:
-                "Use `stash view *` to view all stashed playlists, and `stash\
-                 view {name}` to view the playlist named `{name}`",
-            triggers: ["view", "list"],
-            handler: (arg) => this.stashView(arg),
+        ["stash view"]: {
+            handler: (arg) => this.stashController("view", arg),
+            triggers: ["stash view"].map(Utils.prefixify),
         },
     };
 
     constructor({
         textChannel,
+        initialVoiceChannel,
         initialVoiceChannel: { id, guildId },
         adapterCreator,
         onQuitCallback,
-    }: Types.MusicPlayerArgs) {
+    }: MusicPlayerArgs) {
+        this.TextChannelForGuild = textChannel;
         this.messenger = new Messaging.Messenger(textChannel);
         this.guildId = guildId;
         this.onQuitCallback = onQuitCallback || (() => {});
         try {
-            voice
+            discordJSVoice
                 .joinVoiceChannel({
                     channelId: id,
                     guildId: this.guildId,
@@ -222,39 +204,89 @@ export class MusicPlayer {
             this.messenger.send("Error connecting to the voice channel!");
         }
         this.stashingAllowed = Stash.init();
-    }
-
-    private parser(content: string): [string, string] {
-        return [
-            Utils.removeLinkMarkdown(Utils.getCmd(content)),
-            Utils.removeLinkMarkdown(Utils.getArg(content)),
-        ];
-    }
-
-    private delegator(cmd: string, arg: string) {
-        for (const command of Object.values(this.commands)) {
-            if (command.triggers.includes(cmd)) {
-                return () => command.handler(arg);
-            }
-        }
-        return undefined;
-    }
-
-    public async controller(content: string) {
-        const [command, argument] = this.parser(content);
-        const handler = this.delegator(command, argument);
-        if (handler) handler();
-    }
-
-    private async help() {
+        this.initializeRolesAndPermissions();
         this.messenger.send(
-            Object.entries(this.commands)
-                .map(
-                    ([, { description, triggers }]) =>
-                        `**Commands**: ${triggers.join(", ")}\n` +
-                        (description ? `**Description**: ${description}\n` : "")
-                )
-                .join("\n")
+            `:musical_note: Joined ${initialVoiceChannel} and bound to ${textChannel}`
+        );
+    }
+
+    private initializeRolesAndPermissions() {
+        Object.values(this.commands).forEach(
+            (command) => (command.exclusiveTo = [])
+        );
+        this.commands.lofi.exclusiveTo = this.commands.play.exclusiveTo;
+        const perms = Object.entries(configObj.permissions || {});
+        for (const [role, cmdsExclusiveToThisRole] of perms) {
+            cmdsExclusiveToThisRole.forEach((cmd) => {
+                if ((this.commands as Object).hasOwnProperty(cmd))
+                    this.commands[cmd as RecognizedCommands].exclusiveTo!.push(
+                        role
+                    );
+            });
+        }
+    }
+    public async controller(message: discordJs.Message) {
+        const { cmd, arg } = this.parser(message.content);
+        const delegation = this.delegator(message.member!, cmd, arg);
+        if (delegation) delegation();
+    }
+
+    private parser(content: string) {
+        const parts = content.split(" ").map((str) => str.trim());
+        const splitPoint =
+            parts[0].toLowerCase() === Utils.prefixify("stash") ? 2 : 1;
+        return {
+            cmd: Utils.removeLinkMarkdown(
+                parts.slice(0, splitPoint).join(" ")
+            ).toLowerCase(),
+            arg: Utils.removeLinkMarkdown(parts.slice(splitPoint).join(" ")),
+        };
+    }
+
+    private findCommand(cmd: string) {
+        return Object.values(this.commands).find((command) =>
+            command.triggers.includes(cmd)
+        );
+    }
+
+    private delegator(user: discordJs.GuildMember, cmd: string, arg: string) {
+        const command = this.findCommand(cmd);
+        return command
+            ? this.hasPermissions(user, command)
+                ? () => command.handler(arg)
+                : () => this.noPermission(user, cmd)
+            : undefined;
+    }
+
+    private hasPermissions(user: discordJs.GuildMember, cmd: Command) {
+        // helper function
+        const userHasRole = (user: discordJs.GuildMember, role: string) =>
+            user.roles.cache.some((userRole) => userRole.name === role);
+
+        // if the command has not been restricted at all
+        if (cmd.exclusiveTo!.length === 0) return true;
+
+        // if the user is part of the exclusive list
+        if (cmd.exclusiveTo!.some((role) => userHasRole(user, role)))
+            return true;
+
+        // at this stage, only way this command will be allowed is if allowUnattended = true
+        // AND there is no one else in the voice channel with an exclusiveTo role.
+
+        return (
+            configObj.allowUnattended &&
+            user.voice.channel!.members.some(
+                (fellow) =>
+                    fellow.id !== user.id &&
+                    !fellow.user.bot && // ignore bots thereby ignoring JamBot itself.
+                    cmd.exclusiveTo!.some((role) => userHasRole(fellow, role))
+            )
+        );
+    }
+
+    private async noPermission(user: discordJs.GuildMember, cmd: string) {
+        this.messenger.send(
+            user.toString() + " does not have permission for `" + cmd + "`"
         );
     }
 
@@ -271,7 +303,7 @@ export class MusicPlayer {
         );
     }
 
-    private startSearchFlow(searchResult: Types.Song[]) {
+    private startSearchFlow(searchResult: Song[]) {
         [this.isInSearchFlow, this.searchResult] = [true, searchResult];
     }
 
@@ -285,7 +317,7 @@ export class MusicPlayer {
             return;
         }
 
-        let newSongs: Types.Song[] = [];
+        let newSongs: Song[] = [];
         if (this.isInSearchFlow) {
             for (const pos of arg.split(" ")) {
                 const [possiblyFrom, possiblyTo] = pos
@@ -308,7 +340,11 @@ export class MusicPlayer {
         }
 
         if (!newSongs.length) {
-            newSongs = await Fetcher.controller(arg);
+            for (let _arg of arg.split("&")) {
+                _arg = _arg.trim();
+                this.messenger.sendTyping();
+                if (_arg) newSongs.push(...(await Fetcher.fetch(_arg)));
+            }
             if (!newSongs.length) {
                 this.messenger.send("Could not find song");
                 return;
@@ -316,7 +352,9 @@ export class MusicPlayer {
         }
 
         this.songs.push(...newSongs);
-        if (this.player.state.status !== voice.AudioPlayerStatus.Idle) {
+        if (
+            this.player.state.status !== discordJSVoice.AudioPlayerStatus.Idle
+        ) {
             if (newSongs.length > 1)
                 this.messenger.send(
                     `Added ${newSongs.length} songs to the queue`
@@ -327,13 +365,21 @@ export class MusicPlayer {
         if (!this.started) this.initPlayer();
     }
 
+    private async lofi(arg: string) {
+        const which = parseInt(arg);
+        if (which === 1)
+            this.play("https://www.youtube.com/watch?v=5qap5aO4i9A");
+        else if (which === 2)
+            this.play("https://www.youtube.com/watch?v=DWcJFNfaw9c");
+        else this.invalid();
+    }
     private initPlayer() {
         if (!this.started) this.started = true;
 
         const next = this.nextSong();
         if (next) this.playSong(next);
 
-        this.player.on(voice.AudioPlayerStatus.Idle, () => {
+        this.player.on(discordJSVoice.AudioPlayerStatus.Idle, () => {
             const next = this.nextSong();
             if (next) this.playSong(next);
             else this.quit();
@@ -344,6 +390,13 @@ export class MusicPlayer {
             this.messenger.send("Error playing audio. Skipping");
             this.skip();
         });
+    }
+
+    private async restart() {
+        if (!this.nowPlaying) return;
+        this.songs.unshift(this.nowPlaying as Song);
+        this.player.stop(true);
+        this.messenger.send("Restarting the current song...");
     }
 
     private nextSong() {
@@ -357,9 +410,17 @@ export class MusicPlayer {
         return next;
     }
 
-    private async playSong(song: Types.Song) {
-        const audioResource = voice.createAudioResource(
-            await Streamer.controller(song.url)
+    private async playSong(song: Song) {
+        const converted = await convertInfoToYoutube(song);
+        if (!converted) {
+            this.messenger.send("Could not play this song");
+            this.skip();
+            return;
+        }
+
+        song = converted;
+        const audioResource = discordJSVoice.createAudioResource(
+            await Streamer.streamer(song)
         );
 
         this.player.play(audioResource);
@@ -370,7 +431,10 @@ export class MusicPlayer {
         this.showNp();
     }
     private async pause() {
-        if (this.player.state.status === voice.AudioPlayerStatus.Playing) {
+        if (
+            this.player.state.status ===
+            discordJSVoice.AudioPlayerStatus.Playing
+        ) {
             this.player.pause();
             this.nowPlaying?.elapsedTimer.pause();
             this.messenger.send("Paused");
@@ -380,7 +444,9 @@ export class MusicPlayer {
     }
 
     private async resume() {
-        if (this.player.state.status === voice.AudioPlayerStatus.Paused) {
+        if (
+            this.player.state.status === discordJSVoice.AudioPlayerStatus.Paused
+        ) {
             this.player.unpause();
             this.nowPlaying?.elapsedTimer.play();
         } else {
@@ -560,17 +626,16 @@ export class MusicPlayer {
     }
 
     private async playNow(arg: string) {
-        try {
-            const newSongs = await Fetcher.controller(arg);
-
-            if (newSongs.length) {
-                this.songs.unshift(...newSongs);
-                this.player.stop();
-            } else {
-                this.messenger.send("Could not find song");
-            }
-        } catch (e) {
-            console.log(e);
+        let newSongs: Song[] = [];
+        for (let _arg of arg.split("&")) {
+            _arg = _arg.trim();
+            newSongs.push(...(await Fetcher.fetch(_arg)));
+        }
+        if (newSongs.length) {
+            this.songs.unshift(...newSongs);
+            this.player.stop();
+        } else {
+            this.messenger.send("Could not find song");
         }
     }
 
@@ -601,36 +666,28 @@ export class MusicPlayer {
         }
     }
 
-    private async stashController(_arg: string) {
+    private async stashController(
+        type: "pop" | "push" | "drop" | "view",
+        arg: string
+    ) {
         if (!this.stashingAllowed) {
             this.messenger.send("Stashing is not possible right now, Sorry!");
             return;
         }
-        const [subcmd, arg] = [Utils.getCmd(_arg), Utils.getArg(_arg)];
-        if (subcmd === "help") {
-            this.stashHelp();
-            return;
+        switch (type) {
+            case "pop":
+                this.stashPop(arg);
+                return;
+            case "push":
+                this.stashPush(arg);
+                return;
+            case "drop":
+                this.stashDrop(arg);
+                return;
+            case "view":
+                this.stashView(arg);
+                return;
         }
-        for (const [_name, command] of Object.entries(this.stashCommands)) {
-            if (command.triggers.includes(subcmd)) {
-                command.handler(arg);
-                break;
-            }
-        }
-    }
-    private stashHelp() {
-        const introduction =
-            "Jam-bot can save your queues with a name of your choice so you can access it later!\n\nNote that names **cannot** have spaces";
-        this.messenger.send(
-            [
-                introduction,
-                ...Object.entries(this.stashCommands).map(
-                    ([, { description, triggers }]) =>
-                        `**Commands**: ${triggers.join(", ")}\n` +
-                        (description ? `**Description**: ${description}\n` : "")
-                ),
-            ].join("\n")
-        );
     }
 
     private async stashPop(arg: string) {
@@ -638,7 +695,7 @@ export class MusicPlayer {
             this.invalid();
             return;
         }
-        const stored = (await Stash.pop(this.guildId, arg)) as Types.Song[];
+        const stored = (await Stash.pop(this.guildId, arg)) as Song[];
         if (stored) {
             this.songs.push(...stored);
             if (!this.started) {
@@ -658,7 +715,7 @@ export class MusicPlayer {
             this.invalid();
             return;
         }
-        let toBeStored: Types.Song[] = [];
+        let toBeStored: Song[] = [];
         if (scope === "*") {
             toBeStored = this.songs.slice();
         } else {
@@ -711,7 +768,7 @@ export class MusicPlayer {
         }
     }
 
-    private showStashItem(name: string, list: Types.Song[]) {
+    private showStashItem(name: string, list: Song[]) {
         const revealLimit = 10;
         const nameText = `**${name}**`;
         const listText = list
@@ -756,17 +813,16 @@ export class MusicPlayer {
     private async cleanMessages() {
         await this.messenger.send("Cleaning messages...");
         const musicCommandRecognizer = (content: string) =>
-            !!this.delegator(...this.parser(content));
+            !!this.findCommand(this.parser(content).cmd);
         this.messenger.clean(musicCommandRecognizer);
     }
 
     private async quit() {
-        const con = voice.getVoiceConnection(this.guildId);
+        const con = discordJSVoice.getVoiceConnection(this.guildId);
         if (con) {
             this.messenger.send("_Disconnecting..._");
             con.disconnect();
         }
-
         this.onQuitCallback();
     }
 }

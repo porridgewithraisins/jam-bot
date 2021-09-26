@@ -1,5 +1,5 @@
 import * as discordJs from "discord.js";
-import * as Messaging from "../services/interaction/Messaging";
+import * as Messaging from "../services/Messaging";
 import * as Utils from "../common/Utils";
 
 export class Ping {

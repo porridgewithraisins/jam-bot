@@ -1,19 +1,17 @@
 import * as ytpl from "ytpl";
-import * as Types from "../../common/Types";
 import * as ytdlCoreDiscord from "ytdl-core-discord";
 import * as Utils from "../../common/Utils";
+import { Song } from "../../common/Types";
+import { getSongSource } from "../Fetcher";
 
-const getPlaylist = async (
-    url: string,
-    limit = Infinity
-): Promise<Types.Song[]> => {
+const getPlaylist = async (url: string, limit = Infinity): Promise<Song[]> => {
     const filterItems = ({
         title,
         url,
         duration,
         bestThumbnail: { url: thumbURL },
         author: { name },
-    }: ytpl.Item): Types.Song => ({
+    }: ytpl.Item): Song => ({
         title,
         url,
         duration: duration as string,
@@ -23,7 +21,7 @@ const getPlaylist = async (
     return (await ytpl.default(url, { limit })).items.map(filterItems);
 };
 
-const getSong = async (url: string): Promise<Types.Song[]> => {
+const getSong = async (url: string): Promise<Song[]> => {
     const details = (await ytdlCoreDiscord.getInfo(url)).videoDetails;
     return [
         {
@@ -38,11 +36,11 @@ const getSong = async (url: string): Promise<Types.Song[]> => {
     ];
 };
 
-const delegator = (arg: string): (() => Promise<Types.Song[]>) => {
-    const source = Utils.getSource(arg);
-    if (source === "youtube") return () => getSong(arg);
-    if (source === "youtube-playlist") return () => getPlaylist(arg);
+const delegator = (arg: string): (() => Promise<Song[]>) => {
+    const { src } = getSongSource(arg);
+    if (src === "youtube") return () => getSong(arg);
+    if (src === "youtube-playlist") return () => getPlaylist(arg);
     else throw new Error("Bad url passed to youtube fetcher");
 };
 
-export const controller = (arg: string) => delegator(arg)();
+export const fetchFromYoutube = (arg: string) => delegator(arg)();

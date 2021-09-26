@@ -1,18 +1,18 @@
 import * as ytsr from "ytsr";
-import * as Types from "../../common/Types";
+import { Song } from "../common/Types";
 
-export const keywordSearch = async (query: string): Promise<Types.Song[]> => {
+export const keywordSearch = async (query: string): Promise<Song[]> => {
     const filterItems = ({
         title,
         url,
         bestThumbnail: { url: thumbnail },
         duration,
         author,
-    }: ytsr.Video): Types.Song => ({
+    }: ytsr.Video): Song => ({
         title,
         url,
         thumbnail: thumbnail || undefined,
-        duration: duration || "4:42",
+        duration: duration || "42:42:42",
         artist: author?.name,
     });
     const results = await ytsr.getFilters(query);
@@ -26,5 +26,5 @@ export const keywordSearch = async (query: string): Promise<Types.Song[]> => {
     return searchResults.map((item) => filterItems(item as ytsr.Video));
 };
 
-export const searchOne = async (query: string): Promise<Types.Song[]> =>
+export const searchOne = async (query: string): Promise<Song[]> =>
     (await keywordSearch(query)).slice(0, 1);

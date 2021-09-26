@@ -18,4 +18,4 @@
 
     <img height = "200px" src = "https://i.imgur.com/nU1HIop.png">
 
-6. Copy the bot token by pressing the "Copy" button under the Token setting. The token is like a password, don't reveal it publicly. If you accidentally revealed it, you can generate a new one by clicking the 'Regenerate' button above, which will invalidate all tokens.
+6. Copy the bot token by pressing the "Copy" button under the Token setting. Do not reveal the token publicly, If you accidentally did, you can reset the token by clicking the 'Regenerate' button above. Make sure to update JamBot's configuration with the updated token as well.

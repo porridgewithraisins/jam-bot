@@ -12,41 +12,44 @@ export class PaginatedInteractor {
     async paginate() {
         const msg = await this.to.send({
             embeds: [this.pages[this.currentPage]],
-            components: [
-                {
-                    type: "ACTION_ROW",
-                    components: [
-                        {
-                            type: "BUTTON",
-                            style: "PRIMARY",
-                            label: "First",
-                            emoji: "⏮️",
-                            customId: "⏮️",
-                        },
-                        {
-                            type: "BUTTON",
-                            style: "PRIMARY",
-                            label: "Prev",
-                            emoji: "◀️",
-                            customId: "◀️",
-                        },
-                        {
-                            type: "BUTTON",
-                            style: "PRIMARY",
-                            label: "Next",
-                            emoji: "▶️",
-                            customId: "▶️",
-                        },
-                        {
-                            type: "BUTTON",
-                            style: "PRIMARY",
-                            label: "Last",
-                            emoji: "⏭️",
-                            customId: "⏭️",
-                        },
-                    ],
-                },
-            ],
+            components:
+                this.pages.length > 1
+                    ? [
+                          {
+                              type: "ACTION_ROW",
+                              components: [
+                                  {
+                                      type: "BUTTON",
+                                      style: "PRIMARY",
+                                      label: "First",
+                                      emoji: "⏮️",
+                                      customId: "⏮️",
+                                  },
+                                  {
+                                      type: "BUTTON",
+                                      style: "PRIMARY",
+                                      label: "Prev",
+                                      emoji: "◀️",
+                                      customId: "◀️",
+                                  },
+                                  {
+                                      type: "BUTTON",
+                                      style: "PRIMARY",
+                                      label: "Next",
+                                      emoji: "▶️",
+                                      customId: "▶️",
+                                  },
+                                  {
+                                      type: "BUTTON",
+                                      style: "PRIMARY",
+                                      label: "Last",
+                                      emoji: "⏭️",
+                                      customId: "⏭️",
+                                  },
+                              ],
+                          },
+                      ]
+                    : undefined,
         });
 
         const collector = msg.createMessageComponentCollector({

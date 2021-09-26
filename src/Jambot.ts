@@ -1,10 +1,11 @@
 import * as process from "process";
 import * as discordJs from "discord.js";
-import * as MusicPlayer from "./commands/MusicPlayer";
-import * as Ping from "./commands/Ping";
-import * as Config from "./config/Config";
 import * as Utils from "./common/Utils";
-import * as Types from "./common/Types";
+import * as Views from "./services/Views";
+import { Ping } from "./commands/Ping";
+import { MusicPlayer } from "./commands/MusicPlayer";
+import { Config, configObj } from "./config/Config";
+import { credentials } from "./config/Credentials";
 
 const client = new discordJs.Client({
     intents: [
@@ -13,12 +14,27 @@ const client = new discordJs.Client({
         discordJs.Intents.FLAGS.GUILD_VOICE_STATES,
     ],
 });
-export function init(config: Types.Config) {
-    Config.setConfig(config);
-    if (config.logPerformance)
-        setInterval(() => console.log(process.resourceUsage()), 600_000);
 
-    client.login(Config.getConfig().token);
+const initConfig = async (options: Config) => {
+    try {
+        configObj.load(options);
+    } catch (e: any) {
+        console.error("Configuration error:", e.message);
+        process.exit(1);
+    }
+    if (configObj.spotify) {
+        try {
+            await credentials.refreshSpotifyAccessToken();
+        } catch (e: any) {
+            console.error(e.message);
+            process.exit(1);
+        }
+    }
+};
+
+export function init(options: Config) {
+    initConfig(options);
+    client.login(configObj.token);
 
     client.on("ready", onReady);
 
@@ -27,27 +43,40 @@ export function init(config: Types.Config) {
 
 type GuildID = string;
 
-const MusicPlayers = new discordJs.Collection<
-    GuildID,
-    MusicPlayer.MusicPlayer
->();
+const MusicPlayers = new discordJs.Collection<GuildID, MusicPlayer>();
 
 const onReady = async (client: discordJs.Client) => {
-    await client.user?.setAvatar("assets/jambot.jpg");
+    try {
+        await client.user?.setAvatar("assets/jambot.png");
+    } catch (e) {}
+
     console.log("JamBot is ready to go!");
 };
 
 const onMessage = async (message: discordJs.Message) => {
     if (
-        !message.content.startsWith(Config.getConfig().prefix) ||
+        !message.content.startsWith(configObj.prefix) ||
         message.author.bot ||
-        !message.guild
+        !message.guild ||
+        (message.guild.me &&
+            message.guild.me.voice &&
+            message.guild.me.voice.channel &&
+            message.member &&
+            message.member.voice &&
+            message.member.voice.channel &&
+            message.guild.me.voice.channel.id !==
+                message.member.voice.channel.id)
     ) {
         return;
     }
 
     if (message.content === Utils.prefixify("ping")) {
-        new Ping.Ping().execute(client, message);
+        new Ping().execute(client, message);
+        return;
+    }
+
+    if (message.content.trim() === Utils.prefixify("help")) {
+        message.reply({ embeds: [Views.helpView()] });
         return;
     }
 
@@ -55,19 +84,12 @@ const onMessage = async (message: discordJs.Message) => {
         message.reply("You need to be in a voice channel first");
         return;
     }
-    if (
-        message.guild.me &&
-        message.guild.me.voice &&
-        message.guild.me.voice.channel &&
-        message.guild.me.voice.channel.id !== message.member.voice.channel.id
-    ) {
-        return;
-    }
+
     const id: GuildID = message.guild.id;
-    if (!MusicPlayers.has(id)) {
+    if (!MusicPlayers.has(id) && message.content !== Utils.prefixify("quit")) {
         MusicPlayers.set(
             id,
-            new MusicPlayer.MusicPlayer({
+            new MusicPlayer({
                 textChannel: message.channel,
                 initialVoiceChannel: message.member.voice.channel,
                 adapterCreator: message.guild.voiceAdapterCreator,
@@ -76,6 +98,6 @@ const onMessage = async (message: discordJs.Message) => {
         );
     }
 
-    const playerForGuild = MusicPlayers.get(id) as MusicPlayer.MusicPlayer;
-    playerForGuild.controller(message.content);
+    const playerForThisGuild = MusicPlayers.get(id);
+    if (playerForThisGuild) playerForThisGuild.controller(message);
 };

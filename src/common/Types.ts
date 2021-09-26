@@ -1,31 +1,13 @@
-import * as voice from "@discordjs/voice";
+import * as discordJsVoice from "@discordjs/voice";
 import * as discordJs from "discord.js";
-import * as Timer from "../services/timer/Timer";
-
-export interface Config {
-    token: string;
-    prefix: string;
-    spotify?: {
-        clientID: string;
-        clientSecret: string;
-    };
-    localFolder?: string;
-    logPerformance?: boolean;
-}
+import { MusicPlayer } from "../commands/MusicPlayer";
+import * as Timer from "../services/Timer";
 
 export interface MusicPlayerArgs {
     textChannel: discordJs.TextBasedChannels;
     initialVoiceChannel: discordJs.VoiceChannel | discordJs.StageChannel;
-    adapterCreator: voice.DiscordGatewayAdapterCreator;
+    adapterCreator: discordJsVoice.DiscordGatewayAdapterCreator;
     onQuitCallback?: () => any;
-}
-export interface MusicPlayerCommand {
-    description?: string;
-    triggers: string[];
-    handler: (arg: string) => Promise<void>;
-}
-export interface MusicPlayerCommandMap {
-    [name: string]: MusicPlayerCommand;
 }
 
 export interface Song {
@@ -40,9 +22,13 @@ export interface NowPlaying extends Song {
     elapsedTimer: Timer.ElapsedTimer;
 }
 
-export type SongSource =
-    | "youtube"
-    | "youtube-playlist"
-    | "youtube-search"
-    | "spotify"
-    | "spotify-playlist";
+export type SongSource = {
+    src:
+        | "youtube"
+        | "youtube-playlist"
+        | "youtube-search"
+        | "spotify"
+        | "spotify-playlist"
+        | "spotify-album";
+    meta?: string;
+};

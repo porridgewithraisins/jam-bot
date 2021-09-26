@@ -1,4 +1,4 @@
-import * as Utils from "../../common/Utils";
+import * as Utils from "../common/Utils";
 
 export class ElapsedTimer {
     private elapsedMs = 0;

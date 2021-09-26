@@ -1,5 +1,5 @@
 <p align="center" width="100%">
-    <img height = "300px" src="assets/jambot.jpg"> 
+    <img height = "300px" src="assets/jambot.png"> 
 </p>
 
 <h1 align = "center"> JamBot </h1>
@@ -11,7 +11,7 @@ https://www.npmjs.com/package/jambot
 
 ## Prerequisites
 
-You need to have Node.js v14 LTS installed<sup> [1](#known-bugs)</sup>. You can download it from [here](https://nodejs.org/en/download/). In case you already have a different node version system-wide, you can install v14 for JamBot alone by running
+You need to have Node.js v14 LTS installed<sup> [1](#known-bugs)</sup>. You can download it from [here](https://nodejs.org/en/download/). In case you already have a different node version installed, you can install v14 for JamBot alone by running
 
 ```bash
 npm i node@v14-lts
@@ -44,24 +44,28 @@ You can ignore these warnings
 
 <img src="https://i.imgur.com/hHwdTHn.png" width=400 alt="unsupported engine warnings from discord.js">
 
-## Setting up the discord bot
+## Setting up a discord bot user
 
 [Create a discord bot user](docs/TOKEN.md), and then [add it to your server](docs/ADDING.md).
 
-## Configuration
-
-Follow the instructions at [CONFIG.md](docs/CONFIG.md).
-
 ## Usage
 
-Once you've created the `config.json` file as detailed [here](docs/CONFIG.md), place a javascript file named `bot.js` in
-the `musicbot` folder you created, with the following contents
+Create a `config.json` file in the `musicbot` folder as detailed [here](docs/CONFIG.md).
+
+Place a javascript file named `bot.js` in
+the `musicbot` folder, with the following contents
 
 ```js
 global.AbortController = require("node-abort-controller").AbortController;
 
-require("jambot").init(require("config.json"));
+require("jambot").init({
+    token: "your_discord_bot_token",
+    prefix: "!", // you can change the prefix if you like
+});
 ```
+
+
+This is all that is required for a basic configuration. You can configure Spotify support, Roles and Permissions, and more, as instructed in [CONFIG.md](docs/CONFIG.md)
 
 That's it! Now run this file with the following command.
 
@@ -69,7 +73,7 @@ That's it! Now run this file with the following command.
 node bot.js
 ```
 
-and confirm that the 'ready' message shows up in your terminal. If it does not show up, double check your [configuration](docs/CONFIG.md).
+and confirm that the 'ready' message shows up in your terminal (it might take a couple of seconds)
 
 In a text channel, check the latency of the bot with `ping`, then join a voice channel and see all other available commands with `help`.
 You can also see the commands [here](docs/COMMANDS.MD).

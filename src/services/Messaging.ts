@@ -1,8 +1,8 @@
 import * as discordJs from "discord.js";
-import * as Utils from "../../common/Utils";
-import * as Text from "../../views/Text";
-import * as PaginatedInteractor from "./Pagination";
-
+import * as Utils from "../common/Utils";
+import * as Views from "./Views";
+import * as PaginatedInteractor from "./messaging/Pagination";
+import { MusicPlayer } from "../commands/MusicPlayer";
 export class Messenger {
     private pastMessages: Promise<discordJs.Message>[] = [];
     public shouldBeSilent = false;
@@ -23,7 +23,7 @@ export class Messenger {
         if (embedOrEmbedsOrString instanceof Array) {
             embeds = embedOrEmbedsOrString;
         } else if (typeof embedOrEmbedsOrString === "string") {
-            embeds = [Text.view(embedOrEmbedsOrString)];
+            embeds = [Views.textView(embedOrEmbedsOrString)];
         } else {
             embeds = [embedOrEmbedsOrString];
         }
@@ -67,22 +67,18 @@ export class Messenger {
 
     public async clean(musicCommandRecognizer: (content: string) => boolean) {
         if (this.to instanceof discordJs.TextChannel) {
-            const pastMessages = await this.to.messages.fetch({ limit: 30 });
-            pastMessages.forEach((message) => {
+            const pastMessages = await this.to.messages.fetch({ limit: 100 });
+            for (const pastMsg of pastMessages.values()) {
                 if (
-                    this.to.client.user?.id === message.member?.id ||
-                    message.content === Utils.prefixify("ping") ||
-                    musicCommandRecognizer(message.content)
+                    this.to.client.user?.id === pastMsg.member?.id ||
+                    pastMsg.content === Utils.prefixify("ping") ||
+                    musicCommandRecognizer(pastMsg.content)
                 ) {
-                    if (message.deletable) {
-                        message
-                            .delete()
-                            .catch(() =>
-                                console.log("Could not delete some messages")
-                            );
+                    if (pastMsg.deletable) {
+                        setTimeout(() => pastMsg.delete().catch(), 1000);
                     }
                 }
-            });
+            }
         }
     }
 }

@@ -1,11 +1,4 @@
-import * as ytdlCoreDiscord from "ytdl-core-discord";
-import * as Config from "../config/Config";
-import * as Types from "./Types";
-
-export const getArg = (content: string) =>
-    content.split(" ").slice(1).join(" ").trim();
-
-export const getCmd = (content: string) => content.split(" ")[0].trim();
+import { configObj } from "../config/Config";
 
 export const removeLinkMarkdown = (content: string) => {
     if (content[0] === "<" && content[content.length - 1] === ">")
@@ -13,7 +6,7 @@ export const removeLinkMarkdown = (content: string) => {
     return content;
 };
 
-export const prefixify = (text: string) => Config.getConfig().prefix + text;
+export const prefixify = (text: string) => configObj.prefix + text;
 
 export const mdHyperlinkSong = ({
     title,
@@ -54,15 +47,8 @@ export const coerceSize = (str: string, n: number) => {
     if (str.length > n) {
         return str.substr(0, n - 3) + "...";
     }
-    if (str.length < n - 11) {
-        return (
-            str +
-            "**" +
-            Array(n - str.length - 11)
-                .fill("\t")
-                .join("") +
-            "**"
-        );
+    if (str.length < n){
+        /*TODO: Find a way to pad right with invisible characters in a way that works both on discord desktop and mobile */
     }
     return str;
 };
@@ -71,12 +57,6 @@ export const padZeros = (duration: string) => {
     const tokens = duration.split(":").map((x) => parseInt(x));
     if (tokens.some(isNaN)) return duration;
     return tokens.map((x: number) => ("0" + x).slice(-2)).join(":");
-};
-
-export const getSource = (url: string): Types.SongSource => {
-    if (ytdlCoreDiscord.validateURL(url)) return "youtube";
-    if (/[&?]list=([a-z0-9_]+)/i.exec(url)) return "youtube-playlist";
-    return "youtube-search";
 };
 
 export const prependHttp = (url: string, https = true) => {
