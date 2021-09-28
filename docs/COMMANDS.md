@@ -1,6 +1,6 @@
 <h1 align = "center"> JamBot Commands </h1>
 
--   The commands below are prefixed with `!`, however, you can configure it to be anything you like.
+-   The commands below are prefixed with `!`, however, you can [configure it](CONFIG.md#basic-configuration) to be anything you like.
 -   None of them are case sensitive.
 
 ## Table of contents
@@ -10,6 +10,7 @@
 -   [pause](#pause)
 -   [nowplaying](#nowplaying)
 -   [skip](#skip)
+-   [voteskip](#voteskip)
 -   [restart](#restart)
 -   [queue](#queue)
 -   [move](#move)
@@ -85,6 +86,13 @@ _Aliases_: `!np`
 `!skip` Skip the currently playing song
 
 _Aliases_: `!s`
+
+### voteskip
+
+When [roles and permissions](CONFIG.md#roles-and-permissions) are configured such that
+the `!skip` command is restricted, the members of the voice channel can vote to skip the current song with `!voteskip`
+
+_Aliases_: `!vs`
 
 ### restart
 

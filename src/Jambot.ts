@@ -2,10 +2,11 @@ import * as process from "process";
 import * as discordJs from "discord.js";
 import * as Utils from "./common/Utils";
 import * as Views from "./services/Views";
-import { Ping } from "./commands/Ping";
-import { MusicPlayer } from "./commands/MusicPlayer";
+import * as Commands from "./commands/Commands";
+import { MusicPlayer } from "./models/MusicPlayer";
 import { Config, configObj } from "./config/Config";
 import { credentials } from "./config/Credentials";
+import { controller } from "./controllers/MusicPlayer";
 
 const client = new discordJs.Client({
     intents: [
@@ -71,7 +72,7 @@ const onMessage = async (message: discordJs.Message) => {
     }
 
     if (message.content === Utils.prefixify("ping")) {
-        new Ping().execute(client, message);
+        Commands.ping(client, message);
         return;
     }
 
@@ -91,13 +92,12 @@ const onMessage = async (message: discordJs.Message) => {
             id,
             new MusicPlayer({
                 textChannel: message.channel,
-                initialVoiceChannel: message.member.voice.channel,
-                adapterCreator: message.guild.voiceAdapterCreator,
+                voiceChannel: message.member.voice.channel,
                 onQuitCallback: () => MusicPlayers.delete(id),
             })
         );
     }
 
     const playerForThisGuild = MusicPlayers.get(id);
-    if (playerForThisGuild) playerForThisGuild.controller(message);
+    if (playerForThisGuild) controller(playerForThisGuild, message);
 };

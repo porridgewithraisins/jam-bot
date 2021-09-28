@@ -1,6 +1,6 @@
 # Configuring the bot
 
-### Basic configuration (required)
+### Basic configuration
 
 #### Fields:
 
@@ -40,9 +40,9 @@ So as to keep configuration minimal, JamBot has its roles and permissions system
 
 **permissions**: `{rolename : [commands]}` Specify for each role, the commands that will be _exclusive_ to that role. You can also configure commands to be exclusive to multiple roles. Note that the role name is case sensitive.
 
-**allowUnattended**: (_default: true_) Whether or not to respect the defined permissions for a command when it is used in a voice channel where none of the listening members are able to use the command.
+**allowUnattended**: (_default: true_) Whether or not to respect the defined permissions for a command when it is used in a voice channel where none of the its members are allowed to use said command.
 
-Command names are recognized as present in the table of contents of [COMMANDS.md](COMMANDS.md).
+Command names are recognized as present [here](COMMANDS.md#table-of-contents).
 
 Notes:
 
@@ -77,7 +77,7 @@ Notes:
 ## Full example configuration
 
 ```js
-{
+bot.init({
     "token": "abcdefgh123456789",
     "prefix": ";;",
     "spotify": {
@@ -96,11 +96,11 @@ Notes:
             "keep",
             "keeprange",
             "skipto",
-            "stash_drop"
+            "stash drop"
         ],
         "Stasher" : ["stash", "quit"]
     },
     "allowUnattended": false,
     "periodicallyLogPerformance" : true
-}
+});
 ```

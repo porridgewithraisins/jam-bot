@@ -28,3 +28,9 @@ export const keywordSearch = async (query: string): Promise<Song[]> => {
 
 export const searchOne = async (query: string): Promise<Song[]> =>
     (await keywordSearch(query)).slice(0, 1);
+
+    
+export const __FOR__TESTING__ = {
+    keywordSearch,
+    searchOne,
+};

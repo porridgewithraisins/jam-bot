@@ -2,7 +2,7 @@ import * as discordJs from "discord.js";
 import * as Utils from "../common/Utils";
 import * as Views from "./Views";
 import * as PaginatedInteractor from "./messaging/Pagination";
-import { MusicPlayer } from "../commands/MusicPlayer";
+
 export class Messenger {
     private pastMessages: Promise<discordJs.Message>[] = [];
     public shouldBeSilent = false;
@@ -82,3 +82,5 @@ export class Messenger {
         }
     }
 }
+
+export const __FOR__TESTING__ = {};

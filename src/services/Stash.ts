@@ -1,85 +1,92 @@
 import * as fs from "fs";
+import * as fsp from "fs/promises";
 import path from "path";
-import * as Types from "../common/Types";
+import { Song } from "../common/Types";
 
 /*JSON IS READ WITHOUT TYPE SAFETY, so be careful*/
 
 const STASH_DIR = path.join(__dirname, "stash");
 
-export { init, push, pop, drop, view };
-
 const getFileForGuild = (guildId: string) =>
     path.join(STASH_DIR, guildId + ".json");
 
 const fileExists = (path: string) =>
-    fs.promises.stat(path).then(
+    fsp.stat(path).then(
         () => true,
         () => false
     );
 
-const init = () => {
+export const init = () => {
     try {
         fs.accessSync(__dirname, fs.constants.R_OK | fs.constants.W_OK);
-        if (!fs.existsSync(STASH_DIR)) fs.mkdirSync(STASH_DIR);
+
+        if (!fs.existsSync(STASH_DIR)) {
+            fs.mkdirSync(STASH_DIR);
+        }
         return true;
     } catch (e) {
         console.log(
             "Read and write permissions missing to create the storage folder"
         );
-        console.error(e);
         return false;
     }
 };
 
-const push = (guildId: string, name: string, list: Types.Song[]) => {
+export const push = async (guildId: string, name: string, list: Song[]) => {
     const filePath = getFileForGuild(guildId);
-    fs.readFile(filePath, (_err, data) => {
-        try {
-            const stored = JSON.parse(data.toString());
-            stored[name] = list;
-            fs.writeFile(filePath, JSON.stringify(stored), (e) => {
-                if (e) throw e;
-            });
-        } catch (e) {
-            fs.writeFile(filePath, JSON.stringify({ [name]: list }), (e) => {
-                if (e) throw e;
-            });
-        }
-    });
-    return undefined;
+    try {
+        const data = await fsp.readFile(filePath);
+        const storedLists = JSON.parse(data.toString().trim() || "{}");
+        storedLists[name] = list;
+        await fsp.writeFile(filePath, JSON.stringify(storedLists));
+    } catch (e) {
+        await fsp.writeFile(filePath, JSON.stringify({ [name]: list }));
+    }
 };
 
-const pop = async (guildId: string, name: string) => {
+export const pop = async (guildId: string, name: string) => {
     const filePath = getFileForGuild(guildId);
-    if (await fileExists(filePath)) {
-        const stored = JSON.parse(fs.readFileSync(filePath).toString());
-        return stored[name];
-    } else {
+    try {
+        const data = await fsp.readFile(filePath);
+        const stored = JSON.parse(data.toString().trim() || "{}");
+        return stored[name] as Song[];
+    } catch (e) {
         return undefined;
     }
 };
 
-const drop = (guildId: string, name: string) => {
+export const drop = async (guildId: string, name?: string) => {
     const filePath = getFileForGuild(guildId);
-    fs.readFile(filePath, (e, data) => {
-        if (e) throw e;
-        try {
-            let stored = JSON.parse(data.toString());
-            if (name === "*") stored = {};
-            else delete stored[name];
-            fs.writeFile(filePath, JSON.stringify(stored), (e) => {
-                if (e) throw e;
-            });
-        } catch (e) {}
-    });
+    try {
+        const data = await fsp.readFile(filePath);
+        let stored = JSON.parse(data.toString().trim() || "{}");
+        if (!name) stored = {};
+        else delete stored[name];
+        await fsp.writeFile(filePath, JSON.stringify(stored));
+    } catch (e) {
+        return;
+    }
 };
 
-const view = async (guildId: string, name?: string) => {
+export const view = async (guildId: string, name?: string) => {
     const filePath = getFileForGuild(guildId);
-    if (await fileExists(filePath)) {
-        const stored = JSON.parse(fs.readFileSync(filePath).toString());
-        return name ? stored[name] : stored;
-    } else {
+    try {
+        const data = await fsp.readFile(filePath);
+        const stored = JSON.parse(data.toString().trim() || "{}");
+        return name
+            ? (stored[name] as Song[])
+            : (stored as Record<string, Song[]>);
+    } catch (e) {
         return undefined;
     }
+};
+
+export const __FOR__TESTING__ = {
+    getFileForGuild,
+    fileExists,
+    init,
+    push,
+    pop,
+    drop,
+    view,
 };

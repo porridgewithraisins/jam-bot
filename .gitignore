@@ -4,5 +4,4 @@ todo
 yarn.lock
 /bin
 .vscode
-bot.js
 package-lock.json

@@ -47,7 +47,7 @@ export const coerceSize = (str: string, n: number) => {
     if (str.length > n) {
         return str.substr(0, n - 3) + "...";
     }
-    if (str.length < n){
+    if (str.length < n) {
         /*TODO: Find a way to pad right with invisible characters in a way that works both on discord desktop and mobile */
     }
     return str;
@@ -67,4 +67,18 @@ export const prependHttp = (url: string, https = true) => {
     }
 
     return url.replace(/^(?!(?:\w+?:)?\/\/)/, https ? "https://" : "http://");
+};
+
+export const __FOR__TESTING__ = {
+    clampAtZero,
+    coerceSize,
+    durationToMs,
+    mdHyperlinkSong,
+    millisecToDuration,
+    mod,
+    padZeros,
+    prefixify,
+    prependHttp,
+    removeLinkMarkdown,
+    removeTopicAtEnd,
 };

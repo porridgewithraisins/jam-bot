@@ -46,4 +46,9 @@ const delegator = (arg: string) => {
     }
 };
 
-export const fetch = (arg: string) => delegator(arg)();
+export const fetchSong = (arg: string) => delegator(arg)();
+
+
+export const __FOR__TESTING__ = {
+    getSongSource, delegator
+}

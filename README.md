@@ -50,8 +50,6 @@ You can ignore these warnings
 
 ## Usage
 
-Create a `config.json` file in the `musicbot` folder as detailed [here](docs/CONFIG.md).
-
 Place a javascript file named `bot.js` in
 the `musicbot` folder, with the following contents
 
@@ -64,42 +62,41 @@ require("jambot").init({
 });
 ```
 
+This is all that is required for a basic configuration. You can configure Spotify support, customize Roles and Permissions, and more, as instructed in [CONFIG.md](docs/CONFIG.md)
 
-This is all that is required for a basic configuration. You can configure Spotify support, Roles and Permissions, and more, as instructed in [CONFIG.md](docs/CONFIG.md)
+Now run this file with the following command.
 
-That's it! Now run this file with the following command.
-
-```
+```bash
 node bot.js
 ```
 
-and confirm that the 'ready' message shows up in your terminal (it might take a couple of seconds)
+and confirm that a 'ready' message shows up in your terminal.
 
-In a text channel, check the latency of the bot with `ping`, then join a voice channel and see all other available commands with `help`.
-You can also see the commands [here](docs/COMMANDS.MD).
+Head over to your discord server, and in a text channel, check the latency of the bot with `<your prefix>ping`
+You can see all other commands [here](docs/COMMANDS.MD).
 
-If you wish to, you can employ the same instance of the bot across multiple servers, or multiple instances of the bot on the same server - they won't interfere with each other. However, this will depend on your computer's resources, so you may want to enable performance logging in the [configuration](docs/CONFIG.md).
+If you wish to, you can employ the same instance of the bot across multiple servers, or multiple instances of the bot on the same server - they won't interfere with each other. However, this will depend on your computer's resources, so you may want to [enable performance logging](docs/CONFIG.md#extra-configuration).
 
 ## Development
 
 Clone this repo, and install all dependencies with
 
-```
+```bash
 git clone https://github.com/porridgewithraisins/jam-bot
+# add --depth 1 if you don't want to pull the entire history
 cd jam-bot
 npm i
 ```
 
 Build the typescript files with
 
-```
-npm run build
+```bash
+npm run dist
 ```
 
-Test the various modules, and then start the bot so as to test it on an actual server
-
-```
-npm run test
+Build, run unit tests and then start the bot so as to test it on an actual server, all at once, with
+```bash
+npm test
 ```
 
 ## Updates
@@ -127,8 +124,8 @@ Submit an issue in this Github repo
 
 ## Changelog
 
--   _1.2.0_
-    Added roles and permissions support. Added spotify support. Added better views (with a button-paginated view for queues). Included artist information in songs. Added support to play locally stored songs. Added bot messages !clean feature.
+-   _2.0.0_
+    Added roles and permissions support. Added spotify support. Added better views (with a button-paginated view for queues). Included artist information in songs. Added voteskip feature. Added bot messages clean feature.
 
 -   _1.1.6_
     When multiple instances of the bot are running in the same guild, bots only respond to commands sent by members it shares a voice channel with.

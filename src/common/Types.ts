@@ -1,13 +1,10 @@
-import * as discordJsVoice from "@discordjs/voice";
 import * as discordJs from "discord.js";
-import { MusicPlayer } from "../commands/MusicPlayer";
 import * as Timer from "../services/Timer";
 
 export interface MusicPlayerArgs {
     textChannel: discordJs.TextBasedChannels;
-    initialVoiceChannel: discordJs.VoiceChannel | discordJs.StageChannel;
-    adapterCreator: discordJsVoice.DiscordGatewayAdapterCreator;
-    onQuitCallback?: () => any;
+    voiceChannel: discordJs.VoiceChannel | discordJs.StageChannel;
+    onQuitCallback: () => {};
 }
 
 export interface Song {
