@@ -11,7 +11,7 @@ describe("spotify information to youtube song converter", () => {
         thumbnail: "https://example.thumbnail.test",
         artist: "Arijit Singh",
     };
-    test("converts to youtube url", async () => {
+    it("converts to youtube url", async () => {
         const yt = await spotifyToYoutube.convertSpotifyInfoToYoutube(mock);
         expect(validateURL(yt.url)).toBeTruthy();
     });
@@ -25,7 +25,7 @@ describe("spotify to youtube query strategies", () => {
         thumbnail: "https://thumb.nail",
     };
 
-    test("when there is an artist name provided", () => {
+    it("when there is an artist name provided", () => {
         const strats = spotifyToYoutube.queryStrategies({
             ...mock,
             artist: "artist",
@@ -36,7 +36,7 @@ describe("spotify to youtube query strategies", () => {
         ]);
     });
 
-    test("when no artist name is provided", () => {
+    it("when no artist name is provided", () => {
         const strats = spotifyToYoutube.queryStrategies(mock);
         expect(strats).toStrictEqual(["title https://u.rl", "title"]);
     });

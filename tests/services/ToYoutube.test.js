@@ -18,11 +18,11 @@ describe("to youtube converted", () => {
 
     const useFunc = (mock) => convertInfo(mock);
 
-    test("does not touch youtube songs", async () => {
+    it("does not touch youtube songs", async () => {
         const converted = await useFunc(youtubeMock);
         expect(converted).toStrictEqual(youtubeMock);
     });
-    test("returns a youtube video for non youtube sources", async () => {
+    it("returns a youtube video for non youtube sources", async () => {
         const converted = await useFunc(spotifyMock);
         expect(validateURL(converted.url)).toBeTruthy();
     });

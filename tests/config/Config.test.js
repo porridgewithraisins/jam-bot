@@ -36,26 +36,26 @@ describe("configuration loading and validating tests", () => {
         },
     };
 
-    test("should throw error when token is absent", () => {
+    it("should throw error when token is absent", () => {
         expect(() => config.load(configWithoutToken)).toThrow("Token not provided");
     });
 
-    test("should throw error when spotify is mentioned but no credentials provided", () => {
+    it("should throw error when spotify is mentioned but no credentials provided", () => {
         expect(() => config.load(configWithSpotifyCredentialsMissing)).toThrow(
             "Spotify credentials missing"
         );
     });
-    test("should NOT throw an error when spotify is not even mentioned", () => {
+    it("should NOT throw an error when spotify is not even mentioned", () => {
         config.load(configWithNoMentionOfSpotify);
         expect(config).toBeDefined();
     });
 
-    test("should NOT throw when permissions field is empty", () => {
+    it("should NOT throw when permissions field is empty", () => {
         config.load(configWithEmptyPermissions);
         expect(config).toBeDefined();
     });
 
-    test("should NOT throw when one or more roles have no permissions mentioned", () => {
+    it("should NOT throw when one or more roles have no permissions mentioned", () => {
         config.load(configWithEmptyRole);
         expect(config).toBeDefined();
     });

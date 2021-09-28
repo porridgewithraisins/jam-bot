@@ -128,13 +128,13 @@ describe("queue stashing service", () => {
         },
     ];
 
-    test("retrieve pushed queue intact", async () => {
+    it("retrieve pushed queue intact", async () => {
         await Stash.push("mockGuild12345", "mockQueue", mock1);
         const retrieved = await Stash.pop("mockGuild12345", "mockQueue");
         expect(retrieved).toStrictEqual(mock1);
     });
 
-    test("view one queue without modifying", async () => {
+    it("view one queue without modifying", async () => {
         await Stash.push("mockGuild12345", "mockQueue", mock1);
         let toSee = await Stash.view("mockGuild12345", "mockQueue");
         expect(toSee).toStrictEqual(mock1);
@@ -142,7 +142,7 @@ describe("queue stashing service", () => {
         expect(toSee).toBeDefined();
     });
 
-    test("view all queues without modifying", async () => {
+    it("view all queues without modifying", async () => {
         await Stash.push("mockGuild12345", "mockQueue", mock1);
         await Stash.push("mockGuild12345", "mockQueue2", mock2);
         let retrieved = await Stash.view("mockGuild12345");
@@ -154,14 +154,14 @@ describe("queue stashing service", () => {
         expect(retrieved).toBeDefined();
     });
 
-    test("deletes single queue", async () => {
+    it("deletes single queue", async () => {
         await Stash.push("mockGuild12345", "mockQueue", mock1);
         await Stash.drop("mockGuild12345", "mockQueue");
         const retrieved = await Stash.pop("mockGuild12345", "mockQueue");
         expect(retrieved).toBeUndefined();
     });
 
-    test("deletes all queues", async () => {
+    it("deletes all queues", async () => {
         await Stash.push("mockGuild12345", "mockQueue", mock1);
         await Stash.push("mockGuild12345", "mockQueue2", mock2);
         await Stash.drop("mockGuild12345");
@@ -171,12 +171,12 @@ describe("queue stashing service", () => {
 });
 
 describe("stash - filesystem utility functions", () => {
-    test("checks if file exists", async () => {
+    it("checks if file exists", async () => {
         expect(await Stash.fileExists(__filename)).toBeTruthy();
         expect(await Stash.fileExists("hehehaha")).toBeFalsy();
     });
 
-    test("gets filename from guildID correctly", () => {
+    it("gets filename from guildID correctly", () => {
         expect(Stash.getFileForGuild("298429ghgf8131")).toMatch(
             /^.*298429ghgf8131.json$/
         );

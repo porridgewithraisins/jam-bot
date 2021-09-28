@@ -62,7 +62,7 @@ export const padZeros = (duration: string) => {
 export const prependHttp = (url: string, https = true) => {
     url = url.trim();
 
-    if (/^\.*\/|^(?!localhost)\w+?:/.test(url)) {
+    if (/^\.*\/|^(?!localhost)\w+?:/.it(url)) {
         return url;
     }
 
