@@ -73,7 +73,7 @@ node bot.js
 and confirm that a 'ready' message shows up in your terminal.
 
 Head over to your discord server, and in a text channel, check the latency of the bot with `<your prefix>ping`
-You can see all other commands [here](docs/COMMANDS.MD).
+You can see all other commands [here](docs/COMMANDS.md).
 
 If you wish to, you can employ the same instance of the bot across multiple servers, or multiple instances of the bot on the same server - they won't interfere with each other. However, this will depend on your computer's resources, so you may want to [enable performance logging](docs/CONFIG.md#extra-configuration).
 
