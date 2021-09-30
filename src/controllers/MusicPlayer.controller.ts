@@ -5,7 +5,7 @@ import { MusicPlayer } from "../models/MusicPlayer.model";
 import { prefixify, removeLinkMarkdown } from "../common/Utils";
 import { configObj } from "../common/Config";
 import { RecognizedCommands } from "../registry/RecognizedCommands";
-import { CommandRegistry } from "../registry/CommandRegistry";
+import { CommandRegistry } from "../registry/Command.Registry";
 
 export const controller = async (ctx: MusicPlayer, message: Message) => {
     potentiallyRejoinVoice(ctx);

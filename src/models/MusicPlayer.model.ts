@@ -3,7 +3,7 @@ import {
     Guild, StageChannel, TextBasedChannels,
     VoiceChannel
 } from "discord.js";
-import { CommandRegistry } from "../registry/CommandRegistry";
+import { CommandRegistry } from "../registry/Command.Registry";
 import { configObj } from "../common/Config";
 import { Messenger } from "../services/Messaging";
 import * as Stash from "../services/Stash";
