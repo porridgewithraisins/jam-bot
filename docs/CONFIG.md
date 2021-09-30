@@ -16,7 +16,7 @@
 
 ### Spotify support
 
-You will need to create a [spotify application](https://developer.spotify.com/dashboard/) and provide your client ID and client secret, so that JamBot can interact with the Spotify Web API.
+You will need to create a [spotify application](SPOTIFY.md) and provide your client ID and client secret, so that JamBot can interact with the Spotify Web API.
 
 ```js
 {
