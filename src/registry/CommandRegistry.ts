@@ -89,7 +89,7 @@ export const CommandRegistry: Record<RecognizedCommands, Command> = {
     },
     speakagain: {
         handler: (ctx, _arg) => Commands.unShutUp(ctx),
-        triggers: ["talk", "speak"].map(Utils.prefixify),
+        triggers: ["speakagain", "talk", "speak"].map(Utils.prefixify),
     },
     clean: {
         handler: (ctx, _arg) => Commands.cleanMessages(ctx),
