@@ -61,7 +61,7 @@ Note: soundcloud support has not been added yet
 
 (live streams may take a couple of seconds to start playing, after which it should be normal)
 
-You can also listen to these streams on the original artists' discord radio - discord.gg/lofigirl
+You can also listen to these streams on the original artists' discord radio - https://discord.gg/lofigirl
 
 ### search
 
