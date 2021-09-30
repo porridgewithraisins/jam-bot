@@ -1,6 +1,5 @@
 .env
 /node_modules
-todo
 yarn.lock
 /bin
 .vscode
