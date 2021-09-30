@@ -9,8 +9,8 @@
 
 ```js
 {
-    "token": "your_discord_bot_token",
-    "prefix": "!"
+    token: "your_discord_bot_token",
+    prefix: "!"
 }
 ```
 
@@ -20,9 +20,9 @@ You will need to create a [spotify application](https://developer.spotify.com/da
 
 ```js
 {
-    "spotify": {
-        "clientId": "your_spotify_client_id",
-        "clientSecret": "your_spotify_client_secret"
+    spotify: {
+        clientId: "your_spotify_client_id",
+        clientSecret: "your_spotify_client_secret"
     }
 }
 ```
@@ -50,8 +50,8 @@ Notes:
 
 ```js
 {
-    "permissions": {
-        "DJ": [
+    permissions: {
+        DJ: [
             "pause",
             "skip",
             "quit",
@@ -64,9 +64,9 @@ Notes:
             "skipto",
             "stash drop"
         ],
-        "Some other role": ["stash push", "quit"]
+        ["Some other role"]: ["stash push", "quit"]
     },
-    "allowUnattended": false
+    allowUnattended: false
 }
 ```
 
@@ -78,14 +78,14 @@ Notes:
 
 ```js
 bot.init({
-    "token": "abcdefgh123456789",
-    "prefix": ";;",
-    "spotify": {
-        "clientId": "abcdefghijklmnopqrstuvqxyz",
-        "clientSecret": "zyxqvutsrqponmlkjihgfedcba"
+    token: "abcdefgh123456789",
+    prefix: ";;",
+    spotify: {
+        clientId: "abcdefghijklmnopqrstuvqxyz",
+        clientSecret: "zyxqvutsrqponmlkjihgfedcba"
     },
-    "permissions": {
-        "DJ": [
+    permissions: {
+        DJ: [
             "pause",
             "skip",
             "quit",
@@ -98,9 +98,9 @@ bot.init({
             "skipto",
             "stash drop"
         ],
-        "Stasher" : ["stash", "quit"]
+        Stasher : ["stash", "quit"]
     },
-    "allowUnattended": false,
-    "periodicallyLogPerformance" : true
+    allowUnattended: false,
+    periodicallyLogPerformance : true
 });
 ```
