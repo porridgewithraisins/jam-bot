@@ -1,4 +1,4 @@
-import * as Commands from "../Commands";
+import * as Commands from "../CommandExporter";
 import { MusicPlayer } from "../../models/MusicPlayer";
 
 export const moveRange = async (ctx: MusicPlayer, arg: string) => {

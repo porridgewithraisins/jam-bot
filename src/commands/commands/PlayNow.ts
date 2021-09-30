@@ -1,6 +1,6 @@
-import { Song } from "../../common/Types";
 import { fetchSong } from "../../services/Fetcher";
 import { MusicPlayer } from "../../models/MusicPlayer";
+import { Song } from "../../models/Song";
 
 export const playNow = async (ctx: MusicPlayer, arg: string) => {
     let newSongs: Song[] = [];

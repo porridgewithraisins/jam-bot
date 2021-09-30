@@ -1,8 +1,8 @@
 import * as Stash from "../../services/Stash";
-import * as Commands from "../Commands";
-import { Song } from "../../common/Types";
+import * as Commands from "../CommandExporter";
 import { mdHyperlinkSong, clampAtZero } from "../../common/Utils";
 import { MusicPlayer } from "../../models/MusicPlayer";
+import { Song } from "../../models/Song";
 
 export const stashView = async (ctx: MusicPlayer, arg: string) => {
     if (!arg) {

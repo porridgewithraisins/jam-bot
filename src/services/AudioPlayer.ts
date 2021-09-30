@@ -1,10 +1,10 @@
-import * as Commands from "../commands/Commands";
+import * as Commands from "../commands/CommandExporter";
 import { AudioPlayerStatus, createAudioResource } from "@discordjs/voice";
-import { Song } from "../common/Types";
 import { MusicPlayer } from "../models/MusicPlayer";
 import { streamSong } from "./Streamer";
 import { ElapsedTimer } from "./Timer";
 import { convertInfo } from "./ToYoutube";
+import { Song } from "../models/Song";
 
 export const initPlayer = async (ctx: MusicPlayer) => {
     if (!ctx.started) ctx.started = true;

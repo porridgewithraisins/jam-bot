@@ -1,4 +1,4 @@
-import { Song } from "../../common/Types";
+import { Song } from "../../models/Song";
 import { searchOne } from "../Searcher";
 
 const queryStrategies = (song: Song) =>

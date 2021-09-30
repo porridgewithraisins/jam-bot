@@ -1,4 +1,4 @@
-import * as Commands from "../Commands";
+import * as Commands from "../CommandExporter";
 import { mdHyperlinkSong } from "../../common/Utils";
 import { MusicPlayer } from "../../models/MusicPlayer";
 

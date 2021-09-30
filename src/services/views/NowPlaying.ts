@@ -1,6 +1,6 @@
 import * as Assets from "../../common/Assets";
-import * as Types from "../../common/Types";
 import * as Utils from "../../common/Utils";
+import { NowPlaying } from "../../models/Song";
 import * as Base from "./Base";
 
 export const view = ({
@@ -9,7 +9,7 @@ export const view = ({
     duration,
     elapsedTimer,
     thumbnail,
-}: Types.NowPlaying) =>
+}: NowPlaying) =>
     Base.view()
         .setAuthor("Now Playing")
         .setTitle(Utils.coerceSize(title, 25))

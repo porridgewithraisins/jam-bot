@@ -1,7 +1,7 @@
 import SpotifyWebApi from "spotify-web-api-node";
 import * as Utils from "../../common/Utils";
-import { Song } from "../../common/Types";
 import { credentials } from "../../config/Credentials";
+import { Song } from "../../models/Song";
 import { getSongSource } from "../Fetcher";
 
 const spotifyApi = new SpotifyWebApi();

@@ -2,8 +2,19 @@ import { fetchFromYoutube } from "./fetchers/Youtube";
 import { fetchFromSpotify } from "./fetchers/Spotify";
 import { searchOne } from "./Searcher";
 import * as ytdlCoreDiscord from "ytdl-core-discord";
-import { SongSource } from "../common/Types";
 import { configObj } from "../config/Config";
+
+export type SongSource = {
+    src:
+        | "youtube"
+        | "youtube-playlist"
+        | "youtube-search"
+        | "spotify"
+        | "spotify-playlist"
+        | "spotify-album";
+    meta?: string;
+};
+
 
 export const getSongSource = (url: string): SongSource => {
     if (ytdlCoreDiscord.validateURL(url)) return { src: "youtube" };

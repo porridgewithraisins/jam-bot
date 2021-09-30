@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as fsp from "fs/promises";
 import path from "path";
-import { Song } from "../common/Types";
+import { Song } from "../models/Song";
 
 /*JSON IS READ WITHOUT TYPE SAFETY, so be careful*/
 
@@ -9,12 +9,6 @@ const STASH_DIR = path.join(__dirname, "stash");
 
 const getFileForGuild = (guildId: string) =>
     path.join(STASH_DIR, guildId + ".json");
-
-const fileExists = (path: string) =>
-    fsp.stat(path).then(
-        () => true,
-        () => false
-    );
 
 export const init = () => {
     try {
@@ -83,7 +77,6 @@ export const view = async (guildId: string, name?: string) => {
 
 export const __FOR__TESTING__ = {
     getFileForGuild,
-    fileExists,
     init,
     push,
     pop,

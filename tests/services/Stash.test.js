@@ -171,11 +171,6 @@ describe("queue stashing service", () => {
 });
 
 describe("stash - filesystem utility functions", () => {
-    it("checks if file exists", async () => {
-        expect(await Stash.fileExists(__filename)).toBeTruthy();
-        expect(await Stash.fileExists("hehehaha")).toBeFalsy();
-    });
-
     it("gets filename from guildID correctly", () => {
         expect(Stash.getFileForGuild("298429ghgf8131")).toMatch(
             /^.*298429ghgf8131.json$/

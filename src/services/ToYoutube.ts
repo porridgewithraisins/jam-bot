@@ -1,4 +1,4 @@
-import { Song } from "../common/Types";
+import { Song } from "../models/Song";
 import { getSongSource } from "./Fetcher";
 import { convertSpotifyInfoToYoutube } from "./to-youtube/SpotifyToYoutube";
 

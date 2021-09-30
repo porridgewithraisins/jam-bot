@@ -1,8 +1,8 @@
-import * as Commands from "../Commands";
-import { Song } from "../../common/Types";
+import * as Commands from "../CommandExporter";
 import { MusicPlayer } from "../../models/MusicPlayer";
 import * as Stash from "../../services/Stash";
 import { initPlayer } from "../../services/AudioPlayer";
+import { Song } from "../../models/Song";
 
 export const stashPop = async (ctx: MusicPlayer, arg: string) => {
     if (!arg) {

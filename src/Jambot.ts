@@ -2,7 +2,7 @@ import * as process from "process";
 import * as discordJs from "discord.js";
 import * as Utils from "./common/Utils";
 import * as Views from "./services/Views";
-import * as Commands from "./commands/Commands";
+import * as Commands from "./commands/CommandExporter";
 import { MusicPlayer } from "./models/MusicPlayer";
 import { Config, configObj } from "./config/Config";
 import { credentials } from "./config/Credentials";

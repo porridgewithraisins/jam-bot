@@ -1,7 +1,7 @@
-import * as Commands from "../Commands";
+import * as Commands from "../CommandExporter";
 import { MusicPlayer } from "../../models/MusicPlayer";
 import * as Stash from "../../services/Stash";
-import { Song } from "../../common/Types";
+import { Song } from "../../models/Song";
 
 export const stashPush = async (ctx: MusicPlayer, arg: string) => {
     const [range, name] = arg.split(" ");

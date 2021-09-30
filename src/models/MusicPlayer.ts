@@ -2,8 +2,8 @@ import * as discordJs from "discord.js";
 import * as discordJsVoice from "@discordjs/voice";
 import * as Messaging from "../services/Messaging";
 import * as Stash from "../services/Stash";
-import * as Commands from "../commands/Commands";
-import { Song, NowPlaying, MusicPlayerArgs } from "../common/Types";
+import * as Commands from "../commands/CommandExporter";
+import { Song, NowPlaying } from "./Song";
 import { configObj } from "../config/Config";
 import { prefixify } from "../common/Utils";
 
@@ -227,3 +227,9 @@ export interface Command {
 }
 
 export type RecognizedCommands = typeof MusicPlayer.MusicPlayerCommands[number];
+
+export interface MusicPlayerArgs {
+    textChannel: discordJs.TextBasedChannels;
+    voiceChannel: discordJs.VoiceChannel | discordJs.StageChannel;
+    onQuitCallback: () => {};
+}

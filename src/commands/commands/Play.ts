@@ -1,9 +1,9 @@
 import { AudioPlayerStatus } from "@discordjs/voice";
 import { songView } from "../../services/Views";
-import { Song } from "../../common/Types";
 import { MusicPlayer } from "../../models/MusicPlayer";
 import { fetchSong } from "../../services/Fetcher";
 import { initPlayer } from "../../services/AudioPlayer";
+import { Song } from "../../models/Song";
 
 export const play = async (ctx: MusicPlayer, arg: string) => {
     if (!arg) {
