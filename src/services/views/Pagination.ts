@@ -1,7 +1,7 @@
 import * as discordJs from "discord.js";
 import * as Utils from "../../common/Utils";
 import { Song } from "../../models/Song";
-import * as Views from "../Views";
+import * as Views from "../ViewExporter";
 
 export const view = (title: string, songs: Song[]) => {
     const embeds: discordJs.MessageEmbed[] = [];

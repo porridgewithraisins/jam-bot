@@ -1,21 +1,25 @@
-import * as discordJs from "discord.js";
+import {
+    Message,
+    MessageActionRow,
+    MessageActionRowOptions,
+    MessageEmbed,
+    TextBasedChannels,
+    TextChannel,
+} from "discord.js";
 import * as Utils from "../common/Utils";
-import * as Views from "./Views";
-import * as PaginatedInteractor from "./messaging/Pagination";
+import { PaginatedInteractor } from "./messaging/Pagination";
+import * as Views from "./ViewExporter";
 
 export class Messenger {
-    private pastMessages: Promise<discordJs.Message>[] = [];
+    private pastMessages: Promise<Message>[] = [];
     public shouldBeSilent = false;
-    constructor(private to: discordJs.TextBasedChannels | discordJs.Message) {}
+    constructor(private to: TextBasedChannels | Message) {}
 
     public send(
-        embedOrEmbedsOrString:
-            | string
-            | discordJs.MessageEmbed
-            | discordJs.MessageEmbed[],
+        embedOrEmbedsOrString: string | MessageEmbed | MessageEmbed[],
         componentOrComponents?:
-            | (discordJs.MessageActionRow | discordJs.MessageActionRowOptions)
-            | (discordJs.MessageActionRow | discordJs.MessageActionRowOptions)[]
+            | (MessageActionRow | MessageActionRowOptions)
+            | (MessageActionRow | MessageActionRowOptions)[]
     ) {
         if (this.shouldBeSilent) return;
 
@@ -37,7 +41,7 @@ export class Messenger {
             components = [componentOrComponents];
         }
 
-        if (this.to instanceof discordJs.Message) {
+        if (this.to instanceof Message) {
             const msg = this.to.reply({ embeds, components });
             this.pastMessages.push(msg);
             return msg;
@@ -47,26 +51,23 @@ export class Messenger {
             return msg;
         }
     }
-    public paginate(pages: discordJs.MessageEmbed[]) {
+    public paginate(pages: MessageEmbed[]) {
         if (this.shouldBeSilent) return;
 
-        if (this.to instanceof discordJs.TextChannel)
+        if (this.to instanceof TextChannel)
             this.pastMessages.push(
-                new PaginatedInteractor.PaginatedInteractor(
-                    this.to,
-                    pages
-                ).paginate()
+                new PaginatedInteractor(this.to, pages).paginate()
             );
         else throw new Error("Cannot paginate in a reply");
     }
 
     public sendTyping() {
         if (this.shouldBeSilent) return;
-        if (this.to instanceof discordJs.TextChannel) this.to.sendTyping();
+        if (this.to instanceof TextChannel) this.to.sendTyping();
     }
 
     public async clean(musicCommandRecognizer: (content: string) => boolean) {
-        if (this.to instanceof discordJs.TextChannel) {
+        if (this.to instanceof TextChannel) {
             const pastMessages = await this.to.messages.fetch({ limit: 100 });
             for (const pastMsg of pastMessages.values()) {
                 if (

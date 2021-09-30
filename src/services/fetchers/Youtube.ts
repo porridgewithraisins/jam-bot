@@ -1,8 +1,8 @@
-import * as ytpl from "ytpl";
 import * as ytdlCoreDiscord from "ytdl-core-discord";
+import * as ytpl from "ytpl";
 import * as Utils from "../../common/Utils";
-import { getSongSource } from "../Fetcher";
 import { Song } from "../../models/Song";
+import { getSongSource } from "../Fetcher";
 
 const getPlaylist = async (url: string, limit = Infinity): Promise<Song[]> => {
     const filterItems = ({

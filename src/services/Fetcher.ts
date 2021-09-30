@@ -1,8 +1,8 @@
-import { fetchFromYoutube } from "./fetchers/Youtube";
-import { fetchFromSpotify } from "./fetchers/Spotify";
-import { searchOne } from "./Searcher";
 import * as ytdlCoreDiscord from "ytdl-core-discord";
-import { configObj } from "../config/Config";
+import { configObj } from "../common/Config";
+import { fetchFromSpotify } from "./fetchers/Spotify";
+import { fetchFromYoutube } from "./fetchers/Youtube";
+import { searchOne } from "./Searcher";
 
 export type SongSource = {
     src:
@@ -15,11 +15,10 @@ export type SongSource = {
     meta?: string;
 };
 
-
 export const getSongSource = (url: string): SongSource => {
     if (ytdlCoreDiscord.validateURL(url)) return { src: "youtube" };
     if (/[&?]list=([a-z0-9_]+)/i.exec(url)) return { src: "youtube-playlist" };
-    const [,src, id] =
+    const [, src, id] =
         url.match(
             /https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:(album|track|playlist)\/|\?uri=spotify:track:)((\w|-){22})/
         ) ||
@@ -40,7 +39,6 @@ export const getSongSource = (url: string): SongSource => {
         : { src: "youtube-search" };
 };
 
-
 const delegator = (arg: string) => {
     switch (getSongSource(arg).src) {
         case "youtube":
@@ -59,7 +57,7 @@ const delegator = (arg: string) => {
 
 export const fetchSong = (arg: string) => delegator(arg)();
 
-
 export const __FOR__TESTING__ = {
-    getSongSource, delegator
-}
+    getSongSource,
+    delegator,
+};

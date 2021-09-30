@@ -1,4 +1,4 @@
-const subject = require("../../bin/config/Config").__FOR__TESTING__;
+const subject = require("../../bin/common/Config").__FOR__TESTING__;
 
 describe("configuration loading and validating tests", () => {
     const config = new subject.Config();

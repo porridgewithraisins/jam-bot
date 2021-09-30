@@ -1,5 +1,5 @@
 const util = require("../../bin/common/Utils").__FOR__TESTING__;
-const config = require("../../bin/config/Config").__FOR__TESTING__;
+const config = require("../../bin/common/Config").__FOR__TESTING__;
 
 describe("test for removelinkMarkdown", () => {
     it("should remove link from markdown", () => {

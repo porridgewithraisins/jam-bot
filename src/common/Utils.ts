@@ -1,4 +1,4 @@
-import { configObj } from "../config/Config";
+import { configObj } from "./Config";
 
 export const removeLinkMarkdown = (content: string) => {
     if (content[0] === "<" && content[content.length - 1] === ">")

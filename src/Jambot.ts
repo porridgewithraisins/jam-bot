@@ -1,12 +1,12 @@
-import * as process from "process";
 import * as discordJs from "discord.js";
+import * as process from "process";
+import { Config, configObj } from "./common/Config";
+import { credentials } from "./common/Credentials";
 import * as Utils from "./common/Utils";
-import * as Views from "./services/Views";
-import * as Commands from "./commands/CommandExporter";
-import { MusicPlayer } from "./models/MusicPlayer";
-import { Config, configObj } from "./config/Config";
-import { credentials } from "./config/Credentials";
-import { controller } from "./controllers/MusicPlayer";
+import { controller } from "./controllers/MusicPlayer.controller";
+import { MusicPlayer } from "./models/MusicPlayer.model";
+import * as Commands from "./registry/CommandExporter";
+import * as Views from "./services/ViewExporter";
 
 const client = new discordJs.Client({
     intents: [

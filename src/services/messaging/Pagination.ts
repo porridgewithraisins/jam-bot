@@ -1,13 +1,14 @@
-import * as discordJs from "discord.js";
+import {
+    MessageComponentInteraction,
+    MessageEmbed,
+    TextBasedChannels,
+} from "discord.js";
 import * as Utils from "../../common/Utils";
 
 export class PaginatedInteractor {
     private currentPage = 0;
 
-    constructor(
-        private to: discordJs.TextBasedChannels,
-        private pages: discordJs.MessageEmbed[]
-    ) {}
+    constructor(private to: TextBasedChannels, private pages: MessageEmbed[]) {}
 
     async paginate() {
         const msg = await this.to.send({
@@ -95,7 +96,7 @@ export class PaginatedInteractor {
         return msg;
     }
 
-    private async update(interaction: discordJs.MessageComponentInteraction) {
+    private async update(interaction: MessageComponentInteraction) {
         await interaction.update({
             embeds: [
                 this.pages[this.currentPage].setFooter(
