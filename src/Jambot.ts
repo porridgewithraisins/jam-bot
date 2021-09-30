@@ -35,6 +35,10 @@ const initConfig = async (options: Config) => {
 
 export function init(options: Config) {
     initConfig(options);
+
+    if (configObj.periodicallyLogPerformance)
+        setInterval(() => console.log(process.resourceUsage()), 15 * 60 * 1000);
+
     client.login(configObj.token);
 
     client.on("ready", onReady);
