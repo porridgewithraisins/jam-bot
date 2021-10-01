@@ -46,3 +46,5 @@ class Credentials {
 }
 
 export const credentials = new Credentials();
+
+export const __FOR__TESTING__ = { credentials };

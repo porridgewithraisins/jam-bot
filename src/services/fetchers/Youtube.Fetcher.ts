@@ -48,4 +48,4 @@ const delegator = (arg: string): (() => Promise<Song[]>) => {
 
 export const fetchFromYoutube = (arg: string) => delegator(arg)();
 
-export const __FOR__TESTING__ = { getSong, getPlaylist };
+export const __FOR__TESTING__ = { fetchFromYoutube };

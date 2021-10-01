@@ -11,6 +11,7 @@ export const configMiddleware = async (options: Config) => {
     if (configObj.spotify) {
         try {
             await credentials.refreshSpotifyAccessToken();
+            credentials.startPeriodicallyRefreshingSpotifyAccessToken();
         } catch (e: any) {
             console.error(e.message);
             process.exit(1);

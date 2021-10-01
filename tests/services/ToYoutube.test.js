@@ -2,7 +2,7 @@ const { convertInfo } =
     require("../../bin/services/ToYoutube").__FOR__TESTING__;
 const { validateURL } = require("ytdl-core-discord");
 
-describe("to youtube converted", () => {
+describe("should convert to youtube metadata", () => {
     const youtubeMock = {
         duration: "01:49",
         url: "https://www.youtube.com/watch?v=NghzSmmkhKY",

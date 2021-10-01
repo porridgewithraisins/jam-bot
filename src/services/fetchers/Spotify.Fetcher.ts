@@ -71,4 +71,4 @@ const delegator = (arg: string): (() => Promise<Song[]>) => {
 
 export const fetchFromSpotify = (arg: string) => delegator(arg)();
 
-export const __FOR__TESTING__ = { getPlaylist, getSong, getAlbum };
+export const __FOR__TESTING__ = { fetchFromSpotify };

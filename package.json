@@ -20,7 +20,7 @@
     },
     "scripts": {
         "dist": "./scripts/dist.sh",
-        "test": "npm run dist && jest && node bot.js"
+        "test": "./scripts/test.sh"
     },
     "dependencies": {
         "@discordjs/opus": "^0.5.3",

@@ -1,7 +1,7 @@
 const { getSongSource } =
     require("../../bin/services/Fetcher").__FOR__TESTING__;
 
-describe("Test for getSongSource", () => {
+describe("Tests for getSongSource", () => {
     const mocks = {
         youtube: [
             "https://youtu.be/FwoJkxtmCjw",
@@ -53,6 +53,24 @@ describe("Test for getSongSource", () => {
     it("should classify spotify album correctly", () => {
         expect(getSongSource(mocks["spotify-album"][0]).src).toStrictEqual(
             "spotify-album"
+        );
+    });
+
+    it("should give the correct spotify track ID", () => {
+        expect(getSongSource(mocks["spotify"][0]).meta).toStrictEqual(
+            "37R0bQOQj5a7DOqh1TGzvB"
+        );
+    });
+
+    it("should give the correct spotify playlist ID", () => {
+        expect(getSongSource(mocks["spotify-playlist"][0]).meta).toStrictEqual(
+            "5qYKmVPuW9C3L5rAYwww8e"
+        );
+    });
+
+    it("should give the correct spotify album ID", () => {
+        expect(getSongSource(mocks["spotify-album"][0]).meta).toStrictEqual(
+            "5Nwsra93UQYJ6xxcjcE10x"
         );
     });
 });
