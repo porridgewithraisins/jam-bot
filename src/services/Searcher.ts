@@ -1,5 +1,5 @@
 import * as ytsr from "ytsr";
-import { Song } from "../models/Song";
+import { Song } from "../models/Song.Model";
 
 export const keywordSearch = async (query: string): Promise<Song[]> => {
     const filterItems = ({

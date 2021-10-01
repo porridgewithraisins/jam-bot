@@ -1,6 +1,6 @@
-import { Song } from "../models/Song";
+import { Song } from "../models/Song.Model";
 import { getSongSource } from "./Fetcher";
-import { convertSpotifyInfoToYoutube } from "./to-youtube/SpotifyToYoutube";
+import { convertSpotifyInfoToYoutube } from "./to-youtube/Spotify.ToYoutube";
 
 export const convertInfo = (song: Song) => {
     if (getSongSource(song.url).src === "spotify") {

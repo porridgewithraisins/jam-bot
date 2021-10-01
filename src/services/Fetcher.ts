@@ -1,7 +1,7 @@
 import * as ytdlCoreDiscord from "ytdl-core-discord";
 import { configObj } from "../common/Config";
-import { fetchFromSpotify } from "./fetchers/Spotify";
-import { fetchFromYoutube } from "./fetchers/Youtube";
+import { fetchFromSpotify } from "./fetchers/Spotify.Fetcher";
+import { fetchFromYoutube } from "./fetchers/Youtube.Fetcher";
 import { searchOne } from "./Searcher";
 
 export type SongSource = {

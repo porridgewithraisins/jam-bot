@@ -1,7 +1,7 @@
 import {
     MusicPlayerCommands,
     RecognizedCommands,
-} from "../registry/RecognizedCommands";
+} from "../commands/RecognizedCommands";
 
 export class Config {
     token?: string;

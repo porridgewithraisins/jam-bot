@@ -1,7 +1,7 @@
 import { AudioPlayerStatus, createAudioResource } from "@discordjs/voice";
-import { MusicPlayer } from "../models/MusicPlayer.model";
-import { Song } from "../models/Song";
-import * as Commands from "../registry/CommandExporter";
+import * as Commands from "../commands/CommandExporter";
+import { MusicPlayer } from "../models/MusicPlayer.Model";
+import { Song } from "../models/Song.Model";
 import { streamSong } from "./Streamer";
 import { ElapsedTimer } from "./Timer";
 import { convertInfo } from "./ToYoutube";
@@ -22,7 +22,7 @@ export const initPlayer = async (ctx: MusicPlayer) => {
     ctx.player.on(AudioPlayerStatus.Idle, () => onPlayerIdle());
 
     ctx.player.on("error", (error) => {
-        console.log(error);
+        console.log('Error with stream!', error.message);
         ctx.messenger.send("Error playing audio. Skipping");
         Commands.skip(ctx);
     });

@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as fsp from "fs/promises";
 import path from "path";
-import { Song } from "../models/Song";
+import { Song } from "../models/Song.Model";
 
 /*JSON IS READ WITHOUT TYPE SAFETY, so be careful*/
 

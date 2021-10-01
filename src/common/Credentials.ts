@@ -1,6 +1,6 @@
-import { configObj } from "../common/Config";
 import fetch from "node-fetch";
 import { URLSearchParams } from "url";
+import { configObj } from "../common/Config";
 
 class Credentials {
     spotifyAccessToken: string | undefined;

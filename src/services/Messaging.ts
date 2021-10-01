@@ -4,10 +4,10 @@ import {
     MessageActionRowOptions,
     MessageEmbed,
     TextBasedChannels,
-    TextChannel,
+    TextChannel
 } from "discord.js";
 import * as Utils from "../common/Utils";
-import { PaginatedInteractor } from "./messaging/Pagination";
+import { PaginatedInteractor } from "./messaging/Pagination.Messaging";
 import * as Views from "./ViewExporter";
 
 export class Messenger {
