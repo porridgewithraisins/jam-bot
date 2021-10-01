@@ -22,7 +22,7 @@ export const initPlayer = async (ctx: MusicPlayer) => {
     ctx.player.on(AudioPlayerStatus.Idle, () => onPlayerIdle());
 
     ctx.player.on("error", (error) => {
-        console.log('Error with stream!', error.message);
+        console.log("Error with stream!", error.message);
         ctx.messenger.send("Error playing audio. Skipping");
         Commands.skip(ctx);
     });

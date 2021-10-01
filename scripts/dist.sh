@@ -1,5 +1,7 @@
 #!/bin/bash
 
+prettier --write src/
+
 #builds typescript based on tsconfig.json
 tsc
 

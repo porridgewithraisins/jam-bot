@@ -1,7 +1,7 @@
 import {
     MessageComponentInteraction,
     MessageEmbed,
-    TextBasedChannels
+    TextBasedChannels,
 } from "discord.js";
 import * as Utils from "../../common/Utils";
 
