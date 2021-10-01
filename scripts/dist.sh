@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# removes unused imports
+eslint "src/**" --fix
+# 
 prettier --write src/
 
 #builds typescript based on tsconfig.json

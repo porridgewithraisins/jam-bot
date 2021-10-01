@@ -1,9 +1,9 @@
 import { Message } from "discord.js";
-import { client } from "../models/Client.Model";
 import * as Commands from "../commands/CommandExporter";
 import * as Utils from "../common/Utils";
 import { mainMiddleware } from "../middleware/Message.Middleware";
 import { voiceMiddleware } from "../middleware/Voice.Middleware";
+import { client } from "../models/Client.Model";
 import { controller } from "../musicplayer/MusicPlayer.Controller";
 import { getMusicPlayer } from "../musicplayer/MusicPlayer.Registry";
 import * as Views from "../services/ViewExporter";

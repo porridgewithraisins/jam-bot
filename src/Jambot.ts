@@ -1,9 +1,9 @@
 import * as process from "process";
-import { client } from "./models/Client.Model";
 import { Config, configObj } from "./common/Config";
 import { onMessage } from "./handlers/onMessage.Handler";
 import { onReady } from "./handlers/onReady.Handler";
 import { configMiddleware } from "./middleware/Config.Middleware";
+import { client } from "./models/Client.Model";
 
 export function init(options: Config) {
     configMiddleware(options);
