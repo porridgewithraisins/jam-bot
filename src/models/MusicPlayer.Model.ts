@@ -11,13 +11,14 @@ export class MusicPlayer {
     readonly guild: Guild;
     readonly messenger: Messenger;
     readonly player = createAudioPlayer();
-    stashingAllowed = false;
+    readonly stashingAllowed: boolean;
     readonly onQuitCallback = () => {};
 
     //State variables
     started = false;
     songs: Song[] = [];
     nowPlaying: NowPlaying | undefined;
+    lastPlayed: Song | undefined;
     isInSearchFlow = false;
     searchResult: Song[] = [];
     shouldLoopSong = false;
@@ -26,16 +27,25 @@ export class MusicPlayer {
     permissions: Record<string, string[]> = {};
     //State variables
 
-    constructor({
-        textChannel,
-        voiceChannel,
-        onQuitCallback,
-    }: MusicPlayerArgs) {
-        this.guild = voiceChannel.guild;
-        this.messenger = new Messenger(textChannel);
-        this.onQuitCallback = onQuitCallback;
+    constructor({ text, voice, onQuit }: MusicPlayerArgs) {
+        this.guild = voice.guild;
+        this.messenger = new Messenger(text);
+        this.onQuitCallback = onQuit;
+
+        this.initVoice(voice);
+
+        this.stashingAllowed = Stash.init();
+
+        this.initializeRolesAndPermissions();
+
+        this.messenger.send(
+            `:musical_note: Joined ${voice} and bound to ${text}`
+        );
+    }
+
+    initVoice(voice: VoiceChannel) {
         joinVoiceChannel({
-            channelId: voiceChannel.id,
+            channelId: voice.id,
             guildId: this.guild.id,
             adapterCreator: this.guild.voiceAdapterCreator,
         })
@@ -48,13 +58,9 @@ export class MusicPlayer {
                 } catch (e) {}
             })
             .subscribe(this.player);
-        this.stashingAllowed = Stash.init();
-        this.initializeRolesAndPermissions();
-        this.messenger.send(
-            `:musical_note: Joined ${voiceChannel} and bound to ${textChannel}`
-        );
     }
-    initializeRolesAndPermissions = () => {
+
+    initializeRolesAndPermissions() {
         Object.keys(CommandRegistry).forEach(
             (cmd) => (this.permissions[cmd] = [])
         );
@@ -68,11 +74,11 @@ export class MusicPlayer {
         }
 
         Object.freeze(CommandRegistry);
-    };
+    }
 }
 
 export interface MusicPlayerArgs {
-    textChannel: TextChannel;
-    voiceChannel: VoiceChannel;
-    onQuitCallback: () => {};
+    text: TextChannel;
+    voice: VoiceChannel;
+    onQuit: () => {};
 }

@@ -17,3 +17,5 @@ export const configMiddleware = async (options: Config) => {
         }
     }
 };
+
+export const __FOR__TESTING__ = { configMiddleware };

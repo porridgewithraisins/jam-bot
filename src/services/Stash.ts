@@ -5,7 +5,7 @@ import { Song } from "../models/Song.Model";
 
 /*JSON IS READ WITHOUT TYPE SAFETY, so be careful*/
 
-const STASH_DIR = path.join(__dirname, "stash");
+const STASH_DIR = path.join(__dirname, "jambot-stashing-directory");
 
 const getFileForGuild = (guildId: string) =>
     path.join(STASH_DIR, guildId + ".json");

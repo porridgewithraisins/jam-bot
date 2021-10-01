@@ -16,6 +16,7 @@ export { showQueue } from "./commands/Queue";
 export { quit } from "./commands/Quit";
 export { remove } from "./commands/Remove";
 export { removeRange } from "./commands/RemoveRange";
+export { replay } from "./commands/Replay";
 export { restart } from "./commands/Restart";
 export { search } from "./commands/Search";
 export { showNp } from "./commands/ShowNp";

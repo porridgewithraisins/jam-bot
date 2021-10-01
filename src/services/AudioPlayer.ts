@@ -10,6 +10,7 @@ export const initPlayer = async (ctx: MusicPlayer) => {
     if (!ctx.started) ctx.started = true;
 
     const onPlayerIdle = async () => {
+        ctx.lastPlayed = ctx.nowPlaying;
         const next = await nextSong(ctx);
         if (next) {
             playSong(ctx, next);
@@ -42,12 +43,20 @@ const nextSong = async (ctx: MusicPlayer) => {
 const playSong = async (ctx: MusicPlayer, song: Song) => {
     const converted = await convertInfo(song);
     if (!converted) {
-        ctx.messenger.send("Could not play ctx song");
+        ctx.messenger.send("Could not play song");
         Commands.skip(ctx);
         return;
     }
 
     song = converted;
+
+    if (song.isLive) {
+        ctx.messenger.send(
+            "In the event that live streams stop streaming due to buffering \
+            issues, you can use the `replay` command to continue it."
+        );
+    }
+
     const audioResource = createAudioResource(await streamSong(song));
 
     try {

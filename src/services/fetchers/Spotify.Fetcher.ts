@@ -7,9 +7,7 @@ import { getSongSource } from "../Fetcher";
 const spotifyApi = new SpotifyWebApi();
 
 const getPlaylist = async (id: string): Promise<Song[]> => {
-    return (
-        await spotifyApi.getPlaylistTracks(id, { limit: 1000 })
-    ).body.items.map(
+    return (await spotifyApi.getPlaylistTracks(id)).body.items.map(
         ({
             track: {
                 name,

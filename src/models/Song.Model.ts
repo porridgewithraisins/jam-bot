@@ -4,4 +4,5 @@ export interface Song {
     duration: string;
     thumbnail?: string;
     artist?: string;
+    isLive?: boolean;
 }

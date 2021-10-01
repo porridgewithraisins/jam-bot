@@ -12,6 +12,7 @@ export const MusicPlayerCommands = [
     "play",
     "lofi",
     "restart",
+    "replay",
     "pause",
     "nowplaying",
     "skip",

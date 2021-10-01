@@ -19,6 +19,10 @@ export const CommandRegistry: Record<RecognizedCommands, Command> = {
         handler: (ctx, _arg) => Commands.restart(ctx),
         triggers: ["restart"].map(Utils.prefixify),
     },
+    replay: {
+        handler: (ctx, _arg) => Commands.replay(ctx),
+        triggers: ["replay", "prev"].map(Utils.prefixify),
+    },
     pause: {
         handler: (ctx, _arg) => Commands.pause(ctx),
         triggers: ["pause", "stop"].map(Utils.prefixify),

@@ -1,5 +1,6 @@
 import Collection from "@discordjs/collection";
 import { Message, TextChannel, VoiceChannel } from "discord.js";
+import { CommandRegistry } from "../commands/Command.Registry";
 import { MusicPlayer } from "../models/MusicPlayer.Model";
 
 type GuildId = string;
@@ -9,12 +10,14 @@ export const getMusicPlayer = (message: Message) => {
     const id = message.guild!.id;
     return musicPlayers.has(id)
         ? musicPlayers.get(id)
-        : musicPlayers.set(id, musicPlayerFactory(message)).get(id);
+        : !CommandRegistry.quit.triggers.includes(message.content.trim())
+        ? musicPlayers.set(id, musicPlayerFactory(message)).get(id)
+        : undefined;
 };
 
 const musicPlayerFactory = (message: Message) =>
     new MusicPlayer({
-        textChannel: message.channel as TextChannel,
-        voiceChannel: message.member!.voice.channel as VoiceChannel,
-        onQuitCallback: () => musicPlayers.delete(message.guild!.id),
+        text: message.channel as TextChannel,
+        voice: message.member!.voice.channel as VoiceChannel,
+        onQuit: () => musicPlayers.delete(message.guild!.id),
     });
