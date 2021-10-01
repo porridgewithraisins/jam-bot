@@ -1,5 +1,4 @@
 - test voteskip
 - add tests for fetchers
-- add !replay command
 - test taskQueue with multiple discord commands in quick succession
 - publish as 2.0.0
