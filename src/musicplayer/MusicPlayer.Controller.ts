@@ -6,11 +6,14 @@ import { configObj } from "../common/Config";
 import * as Utils from "../common/Utils";
 import { MusicPlayer } from "../models/MusicPlayer.Model";
 
-export const controller = async (ctx: MusicPlayer, message: Message) => {
+export const commandController = async (ctx: MusicPlayer, message: Message) => {
     potentiallyRejoinVoice(ctx);
     const { cmd, arg } = parser(message.content);
-    const delegation = delegator(ctx, message.member!, cmd, arg);
-    if (delegation) delegation();
+    const delegation = delegator(message.member!, ctx, cmd, arg);
+    if (delegation) {
+        clearTimeout(ctx.idleTimer);
+        delegation();
+    }
 };
 
 const potentiallyRejoinVoice = (ctx: MusicPlayer) => {
@@ -21,8 +24,8 @@ const potentiallyRejoinVoice = (ctx: MusicPlayer) => {
 };
 
 const delegator = (
-    ctx: MusicPlayer,
     user: GuildMember,
+    ctx: MusicPlayer,
     cmd: string,
     arg: string
 ) => {
@@ -36,8 +39,14 @@ const delegator = (
 
 export const parser = (content: string) => {
     const parts = content.split(" ").map((str) => str.trim());
-    const splitPoint =
-        parts[0].toLowerCase() === Utils.prefixify("stash") ? 2 : 1;
+
+    const splitPoint = Object.values(CommandRegistry)
+        .filter((cmd) => cmd.cmdTokens === 2)
+        .flatMap((cmd) => cmd.triggers)
+        .includes(parts.slice(0, 2).join(" ").toLowerCase())
+        ? 2
+        : 1;
+
     return {
         cmd: Utils.removeLinkMarkdown(
             parts.slice(0, splitPoint).join(" ")

@@ -77,6 +77,4 @@ describe("Test for youtube fetcher", () => {
             ])
         );
     });
-
-    afterAll(async () => await new Promise((r) => setTimeout(r, 500)));
-});
+}, 9999);

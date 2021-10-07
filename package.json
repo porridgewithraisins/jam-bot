@@ -20,7 +20,9 @@
     },
     "scripts": {
         "dist": "./scripts/dist.sh",
-        "test": "./scripts/test.sh"
+        "test": "./scripts/test.sh",
+        "dev": "./scripts/dist.sh && ./scripts/start.sh",
+        "start": "./scripts/start.sh"
     },
     "dependencies": {
         "@discordjs/opus": "^0.5.3",

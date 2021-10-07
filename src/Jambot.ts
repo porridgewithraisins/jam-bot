@@ -1,18 +1,5 @@
-import * as process from "process";
-import { Config, configObj } from "./common/Config";
-import { onMessage } from "./handlers/onMessage.Handler";
-import { onReady } from "./handlers/onReady.Handler";
-import { configMiddleware } from "./middleware/Config.Middleware";
-import { client } from "./models/Client.Model";
+import { asciiArt } from "./common/Assets";
 
-export function init(options: Config) {
-    configMiddleware(options);
-    if (configObj.periodicallyLogPerformance)
-        setInterval(() => console.log(process.resourceUsage()), 15 * 60 * 1000);
+console.log(asciiArt);
 
-    client.login(configObj.token);
-
-    client.on("ready", onReady);
-
-    client.on("messageCreate", onMessage);
-}
+export { initializeBot as init } from "./InitBot";

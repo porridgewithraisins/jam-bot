@@ -1,30 +1,37 @@
 import { AudioPlayerStatus, createAudioResource } from "@discordjs/voice";
 import * as Commands from "../commands/CommandExporter";
+import { configObj } from "../common/Config";
 import { MusicPlayer } from "../models/MusicPlayer.Model";
 import { Song } from "../models/Song.Model";
 import { streamSong } from "./Streamer";
 import { ElapsedTimer } from "./Timer";
 import { convertInfo } from "./ToYoutube";
 
-export const initPlayer = async (ctx: MusicPlayer) => {
-    if (!ctx.started) ctx.started = true;
+const onPlayerIdle = async (ctx: MusicPlayer) => {
+    ctx.lastPlayed = ctx.nowPlaying;
+    const next = await nextSong(ctx);
+    if (next) {
+        playSong(ctx, next);
+        ctx.votesForSkip = 0;
+    } else {
+        ctx.idleTimer = setTimeout(() => {
+            Commands.quit(ctx);
+        }, configObj.idleTimeout * 1000);
+        ctx.shouldKickStart = true;
+    }
+};
 
-    const onPlayerIdle = async () => {
-        ctx.lastPlayed = ctx.nowPlaying;
-        const next = await nextSong(ctx);
-        if (next) {
-            playSong(ctx, next);
-            ctx.votesForSkip = 0;
-        } else Commands.quit(ctx);
-    };
+export const kickstartPlayer = async (ctx: MusicPlayer) => {
+    if (ctx.shouldKickStart) {
+        ctx.shouldKickStart = false;
+        onPlayerIdle(ctx);
+    }
 
-    onPlayerIdle();
-
-    ctx.player.on(AudioPlayerStatus.Idle, () => onPlayerIdle());
+    ctx.player.on(AudioPlayerStatus.Idle, () => onPlayerIdle(ctx));
 
     ctx.player.on("error", (error) => {
-        console.log("Error with stream!", error.message);
-        ctx.messenger.send("Error playing audio. Skipping");
+        console.log("Error fetching stream!", error.message);
+        ctx.messenger.send("Error fetching audio. Skipping");
         Commands.skip(ctx);
     });
 };
@@ -51,13 +58,19 @@ const playSong = async (ctx: MusicPlayer, song: Song) => {
     song = converted;
 
     if (song.isLive) {
-        ctx.messenger.send(
-            "In the event that live streams stop streaming due to buffering \
-            issues, you can use the `replay` command to continue it."
+        const msg = ctx.messenger.send(
+            `Live streams may stop due to buffering issues, at which juncture
+            you can use the \`replay\` command to continue it.`
         );
+        if (msg)
+            msg.then((msgObj) =>
+                setTimeout(() => msgObj.delete().catch((_e) => {}), 10_000)
+            );
     }
 
-    const audioResource = createAudioResource(await streamSong(song));
+    const audioResource = createAudioResource(await streamSong(song), {
+        silencePaddingFrames: 20,
+    });
 
     try {
         ctx.player.play(audioResource);

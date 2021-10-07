@@ -15,7 +15,7 @@ export class MusicPlayer {
     readonly onQuitCallback = () => {};
 
     //State variables
-    started = false;
+    shouldKickStart = true;
     songs: Song[] = [];
     nowPlaying: NowPlaying | undefined;
     lastPlayed: Song | undefined;
@@ -25,6 +25,7 @@ export class MusicPlayer {
     shouldLoopQueue = false;
     votesForSkip = 0;
     permissions: Record<string, string[]> = {};
+    idleTimer = setTimeout(() => {});
     //State variables
 
     constructor({ text, voice, onQuit }: MusicPlayerArgs) {

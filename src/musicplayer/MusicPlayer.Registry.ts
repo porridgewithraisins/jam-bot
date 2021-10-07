@@ -6,7 +6,7 @@ import { MusicPlayer } from "../models/MusicPlayer.Model";
 type GuildId = string;
 const musicPlayers = new Collection<GuildId, MusicPlayer>();
 
-export const getMusicPlayer = (message: Message) => {
+export const getMusicPlayerForGuild = (message: Message) => {
     const id = message.guild!.id;
     return musicPlayers.has(id)
         ? musicPlayers.get(id)
@@ -21,3 +21,7 @@ const musicPlayerFactory = (message: Message) =>
         voice: message.member!.voice.channel as VoiceChannel,
         onQuit: () => musicPlayers.delete(message.guild!.id),
     });
+
+export const destroyMusicPlayer = (guildId: string) => {
+    musicPlayers.delete(guildId);
+};

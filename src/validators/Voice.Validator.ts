@@ -1,6 +1,6 @@
 import { Message } from "discord.js";
 
-export const voiceMiddleware = (message: Message): boolean =>
+export const voiceValidator = (message: Message): boolean =>
     Object.values({
         inAVoiceChannel: (message: Message): boolean => {
             if (!message.member?.voice?.channel) {
@@ -14,3 +14,5 @@ export const voiceMiddleware = (message: Message): boolean =>
         isTextChannel: (message: Message): boolean =>
             message.channel.type === "GUILD_TEXT",
     }).every((check) => check(message));
+
+export const __FOR__TESTING = { voiceValidator };

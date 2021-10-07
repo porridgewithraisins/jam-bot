@@ -1,7 +1,7 @@
 import { AudioPlayerStatus } from "@discordjs/voice";
 import { MusicPlayer } from "../../models/MusicPlayer.Model";
 import { Song } from "../../models/Song.Model";
-import { initPlayer } from "../../services/AudioPlayer";
+import { kickstartPlayer } from "../../services/AudioPlayer";
 import { fetchSong } from "../../services/Fetcher";
 import { songView } from "../../services/ViewExporter";
 
@@ -47,7 +47,7 @@ export const play = async (ctx: MusicPlayer, arg: string) => {
         else ctx.messenger.send(songView(newSongs[0]));
     }
 
-    if (!ctx.started) initPlayer(ctx);
+    if (ctx.shouldKickStart) kickstartPlayer(ctx);
 };
 
 const resume = async (ctx: MusicPlayer) => {

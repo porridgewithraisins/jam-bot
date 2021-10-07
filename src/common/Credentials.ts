@@ -2,9 +2,8 @@ import fetch from "node-fetch";
 import { URLSearchParams } from "url";
 import { configObj } from "../common/Config";
 
-class Credentials {
+class SpotifyCredentials {
     spotifyAccessToken: string | undefined;
-    soundCloudAPIKey: string | undefined;
 
     private async getSpotifyAccessToken(
         clientId: string,
@@ -37,7 +36,7 @@ class Credentials {
     }
 
     startPeriodicallyRefreshingSpotifyAccessToken() {
-        setTimeout(this.refreshSpotifyAccessToken, 3600 * 1000);
+        setTimeout(() => this.refreshSpotifyAccessToken, 3600 * 1000);
     }
 
     private encodeSpotifyIDAndSecret(id: string, secret: string) {
@@ -45,6 +44,6 @@ class Credentials {
     }
 }
 
-export const credentials = new Credentials();
+export const credentials = new SpotifyCredentials();
 
 export const __FOR__TESTING__ = { credentials };

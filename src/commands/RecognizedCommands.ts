@@ -2,6 +2,7 @@ import { MusicPlayer } from "../models/MusicPlayer.Model";
 
 export interface Command {
     triggers: string[];
+    cmdTokens: number;
     handler: (ctx: MusicPlayer, arg: string) => Promise<void>;
 }
 

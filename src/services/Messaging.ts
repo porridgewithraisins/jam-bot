@@ -76,7 +76,10 @@ export class Messenger {
                     musicCommandRecognizer(pastMsg.content)
                 ) {
                     if (pastMsg.deletable) {
-                        setTimeout(() => pastMsg.delete().catch(), 1000);
+                        setTimeout(
+                            () => pastMsg.delete().catch((_e) => {}),
+                            1000
+                        );
                     }
                 }
             }

@@ -58,6 +58,4 @@ describe("test for spotify fetcher", () => {
             ])
         );
     });
-
-    afterAll(async () => await new Promise((r) => setTimeout(r, 500)));
-});
+}, 9999);

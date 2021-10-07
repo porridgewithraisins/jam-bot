@@ -3,6 +3,6 @@ import { MusicPlayer } from "../../models/MusicPlayer.Model";
 export const restart = async (ctx: MusicPlayer) => {
     if (!ctx.nowPlaying) return;
     ctx.songs.unshift(ctx.nowPlaying);
-    ctx.player.stop(true);
+    ctx.player.stop();
     ctx.messenger.send("Restarting the current song...");
 };

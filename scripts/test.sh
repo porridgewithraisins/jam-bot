@@ -1,3 +1,1 @@
-npm run dist
-jest --setupFiles dotenv/config
-node bot.js
+NODE_ENV=test jest --setupFiles dotenv/config

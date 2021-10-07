@@ -1,4 +1,3 @@
+- fix stash commands!!!!!!!
 - test voteskip
-- add tests for fetchers
-- test taskQueue with multiple discord commands in quick succession
 - publish as 2.0.0

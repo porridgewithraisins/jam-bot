@@ -4,7 +4,7 @@ import {
 } from "../commands/RecognizedCommands";
 
 export class Config {
-    token?: string;
+    token: string = "";
     prefix: string = "!";
     spotify?: {
         clientId: string;
@@ -14,6 +14,7 @@ export class Config {
         [roleName: string]: RecognizedCommands[];
     } = {};
     allowUnattended = true;
+    idleTimeout = 15;
     periodicallyLogPerformance = false;
     loaded = false;
 
@@ -42,21 +43,29 @@ export class Config {
         if (Array.isArray(obj.permissions))
             throw new Error("Invalid permissions");
 
-        for (const [k, v] of Object.entries(obj.permissions)) {
-            if (!(v instanceof Array))
+        for (const [role, commands] of Object.entries(obj.permissions)) {
+            if (!(commands instanceof Array))
                 throw new Error("Invalid permission configuration");
             let wrongCommand;
             if (
-                (wrongCommand = v.find((cmd) => !(cmd in MusicPlayerCommands)))
+                (wrongCommand = commands.find(
+                    (cmd) => !(cmd in MusicPlayerCommands)
+                ))
             ) {
                 throw new Error(
                     "Invalid command in permissions: " +
-                        k +
+                        role +
                         " - " +
                         wrongCommand
                 );
             }
         }
+        if (obj.idleTimeout && isNaN(parseInt(obj.idleTimeout))) {
+            throw new Error(
+                "idleTimeout must be a number (You can leave it empty for a default of 15 seconds)"
+            );
+        }
+
         return true;
     }
 }
