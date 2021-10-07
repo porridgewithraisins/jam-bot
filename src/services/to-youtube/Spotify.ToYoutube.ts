@@ -4,12 +4,13 @@ import { searchOne } from "../Searcher";
 const queryStrategies = (song: Song) =>
     [
         song.title + " " + (song.artist || "") + " " + song.url,
-        song.title + " " + (song.artist || ""),
+        //TODO: find more strategies
     ].map((str) => str.replace(/ {2,}/g, " ").trim());
 
 export const convertSpotifyInfoToYoutube = async (song: Song) => {
     for (const queryStrat of queryStrategies(song)) {
         const searchResult = (await searchOne(queryStrat))[0];
+        console.log(queryStrat);
         if (searchResult) {
             const { duration, url } = searchResult;
             return { ...song, duration, url };

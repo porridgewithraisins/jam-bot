@@ -6,12 +6,13 @@ import {
     TextBasedChannels,
     TextChannel,
 } from "discord.js";
+import { configObj } from "../common/Config";
 import * as Utils from "../common/Utils";
+import { makeEphemeral } from "./messaging/Ephemeral.Messaging";
 import { PaginatedInteractor } from "./messaging/Pagination.Messaging";
 import * as Views from "./ViewExporter";
 
 export class Messenger {
-    private pastMessages: Promise<Message>[] = [];
     public shouldBeSilent = false;
     constructor(private to: TextBasedChannels | Message) {}
 
@@ -19,7 +20,8 @@ export class Messenger {
         embedOrEmbedsOrString: string | MessageEmbed | MessageEmbed[],
         componentOrComponents?:
             | (MessageActionRow | MessageActionRowOptions)
-            | (MessageActionRow | MessageActionRowOptions)[]
+            | (MessageActionRow | MessageActionRowOptions)[],
+        ephemeral?: { disappearAfter: number }
     ) {
         if (this.shouldBeSilent) return;
 
@@ -41,23 +43,24 @@ export class Messenger {
             components = [componentOrComponents];
         }
 
-        if (this.to instanceof Message) {
-            const msg = this.to.reply({ embeds, components });
-            this.pastMessages.push(msg);
-            return msg;
-        } else {
-            const msg = this.to.send({ embeds, components });
-            this.pastMessages.push(msg);
-            return msg;
-        }
+        const msg =
+            this.to instanceof Message
+                ? this.to.reply({ embeds, components })
+                : this.to.send({ embeds, components });
+
+        if (ephemeral?.disappearAfter)
+            makeEphemeral(msg, ephemeral.disappearAfter);
+        else if (configObj.autoDeleteAfter)
+            makeEphemeral(msg, configObj.autoDeleteAfter);
+
+        return msg;
     }
+
     public paginate(pages: MessageEmbed[]) {
         if (this.shouldBeSilent) return;
 
         if (this.to instanceof TextChannel)
-            this.pastMessages.push(
-                new PaginatedInteractor(this.to, pages).paginate()
-            );
+            new PaginatedInteractor(this.to, pages).paginate();
         else throw new Error("Cannot paginate in a reply");
     }
 

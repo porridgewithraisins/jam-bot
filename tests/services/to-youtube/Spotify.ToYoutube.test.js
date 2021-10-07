@@ -30,14 +30,11 @@ describe("spotify to youtube query strategies", () => {
             ...mock,
             artist: "artist",
         });
-        expect(strats).toStrictEqual([
-            "title artist https://u.rl",
-            "title artist",
-        ]);
+        expect(strats).toStrictEqual(["title artist https://u.rl"]);
     });
 
     it("when no artist name is provided", () => {
         const strats = spotifyToYoutube.queryStrategies(mock);
-        expect(strats).toStrictEqual(["title https://u.rl", "title"]);
+        expect(strats).toStrictEqual(["title https://u.rl"]);
     });
 });

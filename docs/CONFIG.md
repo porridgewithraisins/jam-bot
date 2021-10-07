@@ -29,7 +29,6 @@ You will need to create a [spotify application](SPOTIFY.md) and provide your cli
 
 As required, JamBot will automatically generate access tokens for the API using your client ID and client secret. You will not need to do that.
 
-
 **_Disclaimer_** :
 
 1. Only information about songs is retrieved through the official spotify web API. There is no illegal downloading from spotify going on here.
@@ -42,7 +41,7 @@ So as to keep configuration minimal, JamBot has its roles and permissions system
 
 **allowUnattended**: (_default: true_) Whether or not to respect the defined permissions for a command when it is used in a voice channel where none of the its members are allowed to use said command.
 
-Command names are recognized as present [here](COMMANDS.md#table-of-contents).
+Command names are recognized as present [here](COMMANDS.md#table-of-contents). Note that the commands `ping` and `help` cannot be restricted.
 
 Notes:
 
@@ -72,7 +71,12 @@ Notes:
 
 ### Extra configuration
 
-**periodicallyLogPerformance** : (_default: false_) Log the resource usage of the bot periodically.
+**idleTimeout**: (_default: 15_) The amount of time (in seconds) the bot will wait for before quitting, when the queue becomes empty.
+
+**autoDeleteAfter**: The amount of time (in seconds) after which the bot will automatically delete text messages it sends. Use if you
+want to avoid clutter.
+
+**periodicallyLogPerformance**: (_default: false_) Setting it to `true` will log the resource usage of the bot periodically.
 
 ## Full example configuration
 
@@ -82,7 +86,7 @@ bot.init({
     prefix: ";;",
     spotify: {
         clientId: "abcdefghijklmnopqrstuvqxyz",
-        clientSecret: "zyxqvutsrqponmlkjihgfedcba"
+        clientSecret: "zyxqvutsrqponmlkjihgfedcba",
     },
     permissions: {
         DJ: [
@@ -96,11 +100,13 @@ bot.init({
             "keep",
             "keeprange",
             "skipto",
-            "stash drop"
+            "stash drop",
         ],
-        Stasher : ["stash", "quit"]
+        Stasher: ["stash", "quit"],
     },
     allowUnattended: false,
-    periodicallyLogPerformance : true
+    idleTimeout: 300,
+    autoDeleteAfter: 600,
+    periodicallyLogPerformance: true,
 });
 ```

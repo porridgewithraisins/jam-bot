@@ -4,7 +4,6 @@ import * as Utils from "../common/Utils";
 import { bot } from "../models/Bot.Model";
 import { commandController } from "../musicplayer/MusicPlayer.Controller";
 import { getMusicPlayerForGuild } from "../musicplayer/MusicPlayer.Registry";
-import * as Views from "../services/ViewExporter";
 import { messageValidator } from "../validators/Message.Validator";
 import { voiceValidator } from "../validators/Voice.Validator";
 
@@ -17,7 +16,7 @@ export const onMessage = async (message: Message) => {
     }
 
     if (message.content.trim() === Utils.prefixify("help")) {
-        message.reply({ embeds: [Views.helpView()] });
+        Commands.help(message);
         return;
     }
 

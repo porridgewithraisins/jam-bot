@@ -1,5 +1,6 @@
 export { cleanMessages } from "./commands/CleanMessages";
 export { clearQueue } from "./commands/Clear";
+export { help } from "./commands/Help";
 export { invalid } from "./commands/Invalid";
 export { keep } from "./commands/Keep";
 export { keepRange } from "./commands/KeepRange";

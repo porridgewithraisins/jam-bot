@@ -15,6 +15,7 @@ export class Config {
     } = {};
     allowUnattended = true;
     idleTimeout = 15;
+    autoDeleteAfter?: number;
     periodicallyLogPerformance = false;
     loaded = false;
 
