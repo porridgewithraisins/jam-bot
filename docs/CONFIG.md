@@ -63,7 +63,7 @@ Notes:
             "skipto",
             "stash drop"
         ],
-        ["Some other role"]: ["stash push", "quit"]
+        "Some other role": ["stash push", "quit"]
     },
     allowUnattended: false
 }
@@ -73,8 +73,7 @@ Notes:
 
 **idleTimeout**: (_default: 15_) The amount of time (in seconds) the bot will wait for before quitting, when the queue becomes empty.
 
-**autoDeleteAfter**: The amount of time (in seconds) after which the bot will automatically delete text messages it sends. Use if you
-want to avoid clutter.
+**autoDeleteAfter**: (_default : [never]_) The amount of time (in seconds) after which the bot will automatically delete text messages it sends. Use if you want to avoid clutter in your text channel. Note that the messages that you sent to command the bot will not be deleted by this command. You will have to use `clean` for that.
 
 **periodicallyLogPerformance**: (_default: false_) Setting it to `true` will log the resource usage of the bot periodically.
 

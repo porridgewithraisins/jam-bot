@@ -3,5 +3,12 @@ export const periodicallyLogPerformance = () => {
     console.log(
         `The bot will log resource usage once every ${frequency} seconds`
     );
-    setInterval(() => console.log(process.resourceUsage()), frequency * 1000);
+    logPerformance();
+    setInterval(logPerformance, frequency * 1000);
 };
+
+const logPerformance = () =>
+    console.log(
+        new Date().toLocaleString().slice(0, 18),
+        process.resourceUsage()
+    );

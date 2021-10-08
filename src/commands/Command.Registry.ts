@@ -128,22 +128,22 @@ export const CommandRegistry: Record<RecognizedCommands, Command> = {
         triggers: ["quit", "dc"].map(Utils.prefixify),
         cmdTokens: 1,
     },
-    ["stash pop"]: {
+    "stash pop": {
         handler: (ctx, arg) => Commands.stashPop(ctx, arg),
         triggers: ["stash pop", "stash get"].map(Utils.prefixify),
         cmdTokens: 2,
     },
-    ["stash push"]: {
+    "stash push": {
         handler: (ctx, arg) => Commands.stashPush(ctx, arg),
         triggers: ["stash push", "stash add"].map(Utils.prefixify),
         cmdTokens: 2,
     },
-    ["stash drop"]: {
+    "stash drop": {
         handler: (ctx, arg) => Commands.stashDrop(ctx, arg),
         triggers: ["stash drop"].map(Utils.prefixify),
         cmdTokens: 2,
     },
-    ["stash view"]: {
+    "stash view": {
         handler: (ctx, arg) => Commands.stashView(ctx, arg),
         triggers: ["stash view"].map(Utils.prefixify),
         cmdTokens: 2,
