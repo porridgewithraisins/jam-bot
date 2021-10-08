@@ -10,10 +10,9 @@ const queryStrategies = (song: Song) =>
 export const convertSpotifyInfoToYoutube = async (song: Song) => {
     for (const queryStrat of queryStrategies(song)) {
         const searchResult = (await searchOne(queryStrat))[0];
-        console.log(queryStrat);
         if (searchResult) {
-            const { duration, url } = searchResult;
-            return { ...song, duration, url };
+            const { title, artist, duration, url } = searchResult;
+            return { ...song, title, artist, duration, url };
         }
     }
     return undefined;

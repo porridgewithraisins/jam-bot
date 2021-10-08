@@ -24,6 +24,12 @@ export class Config {
             Object.assign(this, obj);
             this.loaded = true;
         }
+        console.log("JamBot was configured as follows:");
+        console.log({
+            ...this,
+            token: "[redacted]",
+            spotify: { clientId: "[redacted]", clientSecret: "[redacted]" },
+        });
     }
 
     validate(obj: any): obj is this {
@@ -64,6 +70,11 @@ export class Config {
         if (obj.idleTimeout && isNaN(parseInt(obj.idleTimeout))) {
             throw new Error(
                 "idleTimeout must be a number (You can leave it empty for a default of 15 seconds)"
+            );
+        }
+        if (obj.autoDeleteAfter && isNaN(parseInt(obj.autoDeleteAfter))) {
+            throw new Error(
+                "autoDeleteAfter must be a number (You can leave it empty for a default of 15 seconds)"
             );
         }
 

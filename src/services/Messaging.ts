@@ -51,7 +51,7 @@ export class Messenger {
         if (ephemeral?.disappearAfter)
             makeEphemeral(msg, ephemeral.disappearAfter);
         else if (configObj.autoDeleteAfter)
-            makeEphemeral(msg, configObj.autoDeleteAfter);
+            makeEphemeral(msg, configObj.autoDeleteAfter * 1000);
 
         return msg;
     }

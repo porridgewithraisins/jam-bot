@@ -12,18 +12,12 @@ export const keywordSearch = async (query: string): Promise<Song[]> => {
         title,
         url,
         thumbnail: thumbnail || undefined,
-        duration: duration || "42:42:42",
+        duration: duration || "00:00:00",
         artist: author?.name,
     });
-    const results = await ytsr.getFilters(query);
-    const typeFilter = results.get("Type");
-    if (!typeFilter) return [];
-    const videoFilter = typeFilter.get("Video");
-    if (!videoFilter) return [];
-    const url = videoFilter.url;
-    if (!url) return [];
-    const searchResults = (await ytsr.default(url, { pages: 1 })).items;
-    return searchResults.map((item) => filterItems(item as ytsr.Video));
+    return (await ytsr.default(query, { pages: 1 })).items
+        .filter((item) => item.type === "video")
+        .map((item) => filterItems(item as ytsr.Video));
 };
 
 export const searchOne = async (query: string): Promise<Song[]> =>

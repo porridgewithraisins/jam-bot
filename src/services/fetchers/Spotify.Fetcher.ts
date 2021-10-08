@@ -10,45 +10,58 @@ const getPlaylist = async (id: string): Promise<Song[]> => {
     return (await spotifyApi.getPlaylistTracks(id)).body.items.map(
         ({
             track: {
-                name,
-                external_urls: { spotify },
+                name: title,
+                external_urls: { spotify: url },
                 duration_ms,
-                album: { images },
+                album: {
+                    images: [{ url: thumbnail }],
+                },
+                artists: [{ name: artist }],
             },
         }) => ({
-            title: name,
-            url: spotify,
+            title,
+            url,
             duration: Utils.millisecToDuration(duration_ms),
-            thumbnail: images[0].url,
+            thumbnail,
+            artist,
         })
     );
 };
 
-const getSong = async (id: string): Promise<Song[]> => {
-    return (({
-        name,
+const getSong = async (id: string): Promise<Song[]> =>
+    (({
+        name: title,
         duration_ms,
-        album: { images },
-        external_urls: { spotify },
+        album: {
+            images: [{ url: thumbnail }],
+        },
+        external_urls: { spotify: url },
+        artists: [{ name: artist }],
     }: SpotifyApi.SingleTrackResponse): Song[] => [
         {
-            title: name,
+            title,
             duration: Utils.millisecToDuration(duration_ms),
-            thumbnail: images[0].url,
-            url: spotify,
+            thumbnail,
+            url,
+            artist,
         },
     ])((await spotifyApi.getTrack(id)).body);
-};
 
 const getAlbum = async (id: string): Promise<Song[]> => {
     const res = (await spotifyApi.getAlbum(id)).body;
     const thumbnail = res.images[0].url;
     return res.tracks.items.map(
-        ({ duration_ms, external_urls: { spotify }, name }) => ({
-            title: name,
+        ({
+            name: title,
+            duration_ms,
+            external_urls: { spotify: url },
+            artists: [{ name: artist }],
+        }) => ({
+            title,
             duration: Utils.millisecToDuration(duration_ms),
-            url: spotify,
+            url,
             thumbnail,
+            artist,
         })
     );
 };
