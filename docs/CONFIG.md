@@ -73,7 +73,7 @@ Notes:
 
 **idleTimeout**: (_default: 15_) The amount of time (in seconds) the bot will wait for before quitting, when the queue becomes empty.
 
-**autoDeleteAfter**: (_default : [never]_) The amount of time (in seconds) after which the bot will automatically delete text messages it sends. Use if you want to avoid clutter in your text channel. Note that the messages that you sent to command the bot will not be deleted by this command. You will have to use `clean` for that.
+**autoDeleteAfter**: (_default : [never]_) The amount of time (in seconds) once a message is sent/received after which the bot will automatically delete the messages. Use if you want to avoid JamBot-related clutter in your text channel. Note that this will clean JamBot's messages, and the messages you used to command JamBot.
 
 **periodicallyLogPerformance**: (_default: false_) Setting it to `true` will log the resource usage of the bot periodically.
 

@@ -53,6 +53,8 @@ export const coerceSize = (str: string, n: number) => {
     return str;
 };
 
+export const majority = (votes: number, total: number) => votes >= total / 2;
+
 export const padZeros = (duration: string) => {
     const tokens = duration.split(":").map((x) => parseInt(x));
     if (tokens.some(isNaN)) return duration;

@@ -54,8 +54,6 @@ Place a javascript file named `bot.js` in
 the `musicbot` folder, with the following contents
 
 ```js
-global.AbortController = require("node-abort-controller").AbortController;
-
 require("jambot").init({
     token: "your_discord_bot_token",
     prefix: "!", // you can change the prefix if you like
@@ -72,8 +70,7 @@ node bot.js
 
 and confirm that a 'ready' message shows up in your terminal.
 
-Head over to your discord server, and in a text channel, check the latency of the bot with `<your prefix>ping`
-You can see all other commands [here](docs/COMMANDS.md).
+Head over to your discord server, and in a text channel, check the latency of the bot with the `ping` command. You can see all of the commands [here](docs/COMMANDS.md).
 
 If you wish to, you can employ the same instance of the bot across multiple servers, or multiple instances of the bot on the same server - they won't interfere with each other. However, this will depend on your computer's resources, so you may want to [enable performance logging](docs/CONFIG.md#extra-configuration).
 
@@ -94,9 +91,19 @@ Build the typescript files with
 npm run dist
 ```
 
-Build, run unit tests and then start the bot so as to test it on an actual server, all at once, with
+Run the unit tests with
+
 ```bash
 npm test
+```
+Start the bot with
+
+```bash
+npm start
+```
+You can also inspect the application with a debugger of your choice with
+```bash
+npm run debug
 ```
 
 ## Updates
@@ -112,11 +119,10 @@ simply deleting the folder suffices.
 ## Known bugs
 
 -   _Description_: There is a problem with the audio stream returned by ytdl on
-    node.js v16. Relevant issue tracker :
+    Node.JS v16. Relevant issue tracker:
     https://github.com/fent/node-ytdl-core/issues/902
 
-    _Status_: Workaround implemented - Using node v14 even though discordjs
-    complains. [AbortController](https://www.npmjs.com/package/node-abort-controller) is also required.
+    _Status_: Workaround implemented - Using Node.JS v14 even though discord.js complains. [AbortController](https://www.npmjs.com/package/node-abort-controller) is also required.
 
 ## Bugs/Feature requests
 
@@ -125,7 +131,14 @@ Submit an issue in this Github repo
 ## Changelog
 
 -   _2.0.0_
-    Added roles and permissions support. Added spotify support. Added better views (with a button-paginated view for queues). Included artist information in songs. Added voteskip feature. Added bot messages clean feature.
+    - Ability to configure Roles and permissions
+    - Spotify support
+    - Better views, with pagination among other visual improvements
+    - Added avatar
+    - Artist information in songs
+    - `clean`, `voteskip`, `replay` and `restart` commands
+    - Ability to configure idle timeout.
+    - Ability to configure time after which bot messages will be auto-deleted.
 
 -   _1.1.6_
     When multiple instances of the bot are running in the same guild, bots only respond to commands sent by members it shares a voice channel with.
@@ -134,3 +147,12 @@ Submit an issue in this Github repo
     supported, such as in !search
 -   _1.1.4_
     Fix youtube search issue.
+
+## Acknowledgements
+
+
+- [ytsr](https://github.com/TimeForANinja/node-ytsr) for facilitating youtube search
+- [ytpl](https://github.com/TimeForANinja/node-ytpl) for facilitating fetching information about youtube playlists
+- [The official spotify web API](https://github.com/thelinmichael/spotify-web-api-node) for facilitating fetching song metadata from Spotify.
+- [ytdl-discord](https://github.com/amishshah/ytdl-core-discord) for facilitating fetching streams from youtube
+- https://github.com/Puj7 for the JamBot avatar.

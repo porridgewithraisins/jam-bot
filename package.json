@@ -21,13 +21,16 @@
     "scripts": {
         "dist": "./scripts/dist.sh",
         "test": "./scripts/test.sh",
-        "dev": "./scripts/dist.sh && ./scripts/start.sh",
-        "start": "./scripts/start.sh"
+        "dev": "./scripts/dist.sh; node bot.js",
+        "debug": "./scripts/debug.sh",
+        "start": "NODE_ENV=production node bot.js",
+        "start:win": "set NODE_ENV=production node bot.js"
     },
     "dependencies": {
         "@discordjs/opus": "^0.5.3",
         "@discordjs/voice": "^0.6.0",
         "discord.js": "^13.1.0",
+        "latest-version": "^6.0.0",
         "libsodium-wrappers": "^0.7.9",
         "node-abort-controller": "^3.0.0",
         "node-fetch": "^2.6.5",

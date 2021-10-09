@@ -1,7 +1,7 @@
 import * as Assets from "../../common/Assets";
 import * as Utils from "../../common/Utils";
 import { NowPlaying } from "../../models/NowPlaying.Model";
-import * as Base from "./Base.View";
+import * as Views from "../ViewExporter";
 
 export const view = ({
     title,
@@ -10,7 +10,7 @@ export const view = ({
     elapsedTimer,
     thumbnail,
 }: NowPlaying) =>
-    Base.view()
+    Views.baseView()
         .setAuthor("Now Playing")
         .setTitle(Utils.coerceSize(title, 25))
         .setURL(url)

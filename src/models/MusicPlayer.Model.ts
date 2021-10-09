@@ -1,5 +1,5 @@
 import { createAudioPlayer, joinVoiceChannel } from "@discordjs/voice";
-import { Guild, TextChannel, VoiceChannel } from "discord.js";
+import { Guild, Message, TextChannel, VoiceChannel } from "discord.js";
 import { CommandRegistry } from "../commands/Command.Registry";
 import { configObj } from "../common/Config";
 import { Messenger } from "../services/Messaging";
@@ -24,6 +24,7 @@ export class MusicPlayer {
     shouldLoopSong = false;
     shouldLoopQueue = false;
     votesForSkip = 0;
+    voteSkipMsg: Message | undefined;
     permissions: Record<string, string[]> = {};
     idleTimer = setTimeout(() => {});
     //State variables
@@ -37,7 +38,7 @@ export class MusicPlayer {
 
         this.stashingAllowed = Stash.init();
 
-        this.initializeRolesAndPermissions();
+        this.setRolesAndPermissions();
 
         this.messenger.send(
             `:musical_note: Joined ${voice} and bound to ${text}`
@@ -61,7 +62,7 @@ export class MusicPlayer {
             .subscribe(this.player);
     }
 
-    initializeRolesAndPermissions() {
+    setRolesAndPermissions() {
         Object.keys(CommandRegistry).forEach(
             (cmd) => (this.permissions[cmd] = [])
         );

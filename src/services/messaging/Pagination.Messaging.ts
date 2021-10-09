@@ -1,14 +1,14 @@
 import {
     MessageComponentInteraction,
     MessageEmbed,
-    TextBasedChannels,
+    TextChannel,
 } from "discord.js";
 import * as Utils from "../../common/Utils";
 
 export class PaginatedInteractor {
     private currentPage = 0;
 
-    constructor(private to: TextBasedChannels, private pages: MessageEmbed[]) {}
+    constructor(private to: TextChannel, private pages: MessageEmbed[]) {}
 
     async paginate() {
         const msg = await this.to.send({

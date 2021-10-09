@@ -1,10 +1,10 @@
 import * as Assets from "../../common/Assets";
 import * as Utils from "../../common/Utils";
 import { Song } from "../../models/Song.Model";
-import * as Base from "./Base.View";
+import * as Views from "../ViewExporter";
 
 export const view = ({ title, url, thumbnail, artist }: Song) =>
-    Base.view()
+    Views.baseView()
         .setTitle(Utils.coerceSize(title, 25))
         .setAuthor("Added to queue")
         .setURL(url)

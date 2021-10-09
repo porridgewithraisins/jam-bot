@@ -1,9 +1,10 @@
+import EventEmitter from "events";
 import {
     MusicPlayerCommands,
     RecognizedCommands,
 } from "../commands/RecognizedCommands";
 
-export class Config {
+export class Config extends EventEmitter {
     token: string = "";
     prefix: string = "!";
     spotify?: {

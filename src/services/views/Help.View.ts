@@ -1,7 +1,7 @@
 import * as Assets from "../../common/Assets";
-import * as Base from "./Base.View";
+import * as Views from "../ViewExporter";
 
 export const view = (stash = false) =>
-    Base.view()
+    Views.baseView()
         .setTitle("You can view the help text here")
         .setURL(Assets.commandHelpDocs + (stash ? "#stash" : ""));

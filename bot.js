@@ -1,7 +1,6 @@
 const bot = require("./bin/Jambot");
 require("dotenv").config();
 
-global.AbortController = require("node-abort-controller").AbortController;
 bot.init({
     token: process.env.DISCORD_BOT_TOKEN,
     prefix: "!",

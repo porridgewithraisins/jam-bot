@@ -13,6 +13,10 @@ export const commandController = async (ctx: MusicPlayer, message: Message) => {
     if (delegation) {
         clearTimeout(ctx.idleTimer);
         delegation();
+        setTimeout(
+            () => message.delete().catch((noop) => noop),
+            configObj.autoDeleteAfter
+        );
     }
 };
 

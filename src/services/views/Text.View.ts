@@ -1,3 +1,3 @@
-import * as Base from "./Base.View";
+import * as Views from "../ViewExporter";
 
-export const view = (text: string) => Base.view().setDescription(text);
+export const view = (text: string) => Views.baseView().setDescription(text);
