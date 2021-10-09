@@ -60,7 +60,8 @@ const playSong = async (ctx: MusicPlayer, song: Song) => {
     if (song.isLive) {
         ctx.messenger.send(
             `Live streams may stop due to buffering issues, at which juncture
-            you can use the \`replay\` command to continue it.`,
+            you can stop the stream and then use the \`replay\` command to 
+            continue it.`,
             undefined,
             { disappearAfter: 10_000 }
         );
