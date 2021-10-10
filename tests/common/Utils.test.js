@@ -7,16 +7,6 @@ describe("test for removelinkMarkdown", () => {
             "https://test.url"
         );
     });
-    it("should not touch if only <", () => {
-        expect(util.removeLinkMarkdown("<https://test.url")).toStrictEqual(
-            "<https://test.url"
-        );
-    });
-    it("should not touch if only >", () => {
-        expect(util.removeLinkMarkdown("https://test.url>")).toStrictEqual(
-            "https://test.url>"
-        );
-    });
     it("should not touch without any < or >", () => {
         expect(util.removeLinkMarkdown("https://test.url")).toStrictEqual(
             "https://test.url"

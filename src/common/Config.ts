@@ -4,6 +4,8 @@ import {
     RecognizedCommands,
 } from "../commands/RecognizedCommands";
 
+type Permissions = { [roleName: string]: RecognizedCommands[] };
+
 export class Config extends EventEmitter {
     token: string = "";
     prefix: string = "!";
@@ -11,9 +13,7 @@ export class Config extends EventEmitter {
         clientId: string;
         clientSecret: string;
     };
-    permissions: {
-        [roleName: string]: RecognizedCommands[];
-    } = {};
+    permissions: Permissions = {};
     allowUnattended = true;
     idleTimeout = 15;
     autoDeleteAfter?: number;
@@ -25,12 +25,6 @@ export class Config extends EventEmitter {
             Object.assign(this, obj);
             this.loaded = true;
         }
-        console.log("JamBot was configured as follows:");
-        console.log({
-            ...this,
-            token: "[redacted]",
-            spotify: { clientId: "[redacted]", clientSecret: "[redacted]" },
-        });
     }
 
     validate(obj: any): obj is this {
@@ -57,7 +51,7 @@ export class Config extends EventEmitter {
             let wrongCommand;
             if (
                 (wrongCommand = commands.find(
-                    (cmd) => !(cmd in MusicPlayerCommands)
+                    (cmd) => !MusicPlayerCommands.includes(cmd)
                 ))
             ) {
                 throw new Error(

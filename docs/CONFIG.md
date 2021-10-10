@@ -39,7 +39,7 @@ So as to keep configuration minimal, JamBot has its roles and permissions system
 
 **permissions**: `{rolename : [commands]}` Specify for each role, the commands that will be _exclusive_ to that role. You can also configure commands to be exclusive to multiple roles. Note that the role name is case sensitive.
 
-**allowUnattended**: (_default: true_) Whether or not to respect the defined permissions for a command when it is used in a voice channel where none of the its members are allowed to use said command.
+**allowUnattended**: (_default: true_) Whether or not to respect the defined permissions for a command when it is used in a voice channel where none of the participants are in the permissions list for said command.
 
 Command names are recognized as present [here](COMMANDS.md#table-of-contents). Note that the commands `ping` and `help` cannot be restricted.
 

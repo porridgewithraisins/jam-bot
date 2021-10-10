@@ -1,10 +1,7 @@
 import { configObj } from "./Config";
 
-export const removeLinkMarkdown = (content: string) => {
-    if (content[0] === "<" && content[content.length - 1] === ">")
-        return content.slice(1, -1);
-    return content;
-};
+export const removeLinkMarkdown = (content: string) =>
+    content.replace(/[<>]/g, "");
 
 export const prefixify = (text: string) => configObj.prefix + text;
 
@@ -53,7 +50,7 @@ export const coerceSize = (str: string, n: number) => {
     return str;
 };
 
-export const majority = (votes: number, total: number) => votes >= total / 2;
+export const majority = (votes: number, total: number) => votes > total / 2;
 
 export const padZeros = (duration: string) => {
     const tokens = duration.split(":").map((x) => parseInt(x));

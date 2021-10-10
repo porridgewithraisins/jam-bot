@@ -7,63 +7,78 @@ import { getSongSource } from "../Fetcher";
 const spotifyApi = new SpotifyWebApi();
 
 const getPlaylist = async (id: string): Promise<Song[]> => {
-    return (await spotifyApi.getPlaylistTracks(id)).body.items.map(
-        ({
-            track: {
-                name: title,
-                external_urls: { spotify: url },
-                duration_ms,
-                album: {
-                    images: [{ url: thumbnail }],
+    try {
+        const result = await spotifyApi.getPlaylistTracks(id);
+        return result.body.items.map(
+            ({
+                track: {
+                    name: title,
+                    external_urls: { spotify: url },
+                    duration_ms,
+                    album: {
+                        images: [{ url: thumbnail }],
+                    },
+                    artists: [{ name: artist }],
                 },
-                artists: [{ name: artist }],
-            },
-        }) => ({
-            title,
-            url,
-            duration: Utils.millisecToDuration(duration_ms),
-            thumbnail,
-            artist,
-        })
-    );
+            }) => ({
+                title,
+                url,
+                duration: Utils.millisecToDuration(duration_ms),
+                thumbnail,
+                artist,
+            })
+        );
+    } catch {
+        return [];
+    }
 };
 
-const getSong = async (id: string): Promise<Song[]> =>
-    (({
-        name: title,
-        duration_ms,
-        album: {
-            images: [{ url: thumbnail }],
-        },
-        external_urls: { spotify: url },
-        artists: [{ name: artist }],
-    }: SpotifyApi.SingleTrackResponse): Song[] => [
-        {
-            title,
-            duration: Utils.millisecToDuration(duration_ms),
-            thumbnail,
-            url,
-            artist,
-        },
-    ])((await spotifyApi.getTrack(id)).body);
-
-const getAlbum = async (id: string): Promise<Song[]> => {
-    const res = (await spotifyApi.getAlbum(id)).body;
-    const thumbnail = res.images[0].url;
-    return res.tracks.items.map(
-        ({
+const getSong = async (id: string): Promise<Song[]> => {
+    try {
+        const result = await spotifyApi.getTrack(id);
+        return (({
             name: title,
             duration_ms,
+            album: {
+                images: [{ url: thumbnail }],
+            },
             external_urls: { spotify: url },
             artists: [{ name: artist }],
-        }) => ({
-            title,
-            duration: Utils.millisecToDuration(duration_ms),
-            url,
-            thumbnail,
-            artist,
-        })
-    );
+        }: SpotifyApi.SingleTrackResponse): Song[] => [
+            {
+                title,
+                duration: Utils.millisecToDuration(duration_ms),
+                thumbnail,
+                url,
+                artist,
+            },
+        ])(result.body);
+    } catch {
+        return [];
+    }
+};
+
+const getAlbum = async (id: string): Promise<Song[]> => {
+    try {
+        const res = (await spotifyApi.getAlbum(id)).body;
+        const thumbnail = res.images[0].url;
+        return res.tracks.items.map(
+            ({
+                name: title,
+                duration_ms,
+                external_urls: { spotify: url },
+                artists: [{ name: artist }],
+            }) => ({
+                title,
+                duration: Utils.millisecToDuration(duration_ms),
+                url,
+                thumbnail,
+                artist,
+            })
+        );
+    } catch {
+        return [];
+    }
 };
 
 const delegator = (arg: string): (() => Promise<Song[]>) => {

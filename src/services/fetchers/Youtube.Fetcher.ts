@@ -20,23 +20,33 @@ const getPlaylist = async (url: string, limit = 100): Promise<Song[]> => {
         artist: name,
         isLive,
     });
-    return (await ytpl.default(url, { limit })).items.map(filterItems);
+    try {
+        const result = await ytpl.default(url, { limit });
+        return result.items.map(filterItems);
+    } catch {
+        return [];
+    }
 };
 
 const getSong = async (url: string): Promise<Song[]> => {
-    const details = (await ytdlCoreDiscord.getInfo(url)).videoDetails;
-    return [
-        {
-            title: details.title,
-            url: details.video_url,
-            duration: Utils.millisecToDuration(
-                parseInt(details.lengthSeconds) * 1000
-            ),
-            thumbnail: details.thumbnails[0].url,
-            artist: details.author.name,
-            isLive: details.isLiveContent,
-        },
-    ];
+    try {
+        const result = await ytdlCoreDiscord.getInfo(url);
+        const details = result.videoDetails;
+        return [
+            {
+                title: details.title,
+                url: details.video_url,
+                duration: Utils.millisecToDuration(
+                    parseInt(details.lengthSeconds) * 1000
+                ),
+                thumbnail: details.thumbnails[0].url,
+                artist: details.author.name,
+                isLive: details.isLiveContent,
+            },
+        ];
+    } catch {
+        return [];
+    }
 };
 
 const delegator = (arg: string): (() => Promise<Song[]>) => {

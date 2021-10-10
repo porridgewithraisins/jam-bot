@@ -7,6 +7,7 @@ import * as Utils from "../common/Utils";
 import { MusicPlayer } from "../models/MusicPlayer.Model";
 
 export const commandController = async (ctx: MusicPlayer, message: Message) => {
+    if (message.channel.id != ctx.messenger.to.id) return;
     potentiallyRejoinVoice(ctx);
     const { cmd, arg } = parser(message.content);
     const delegation = delegator(message.member!, ctx, cmd, arg);
@@ -92,14 +93,15 @@ const hasPermissions = (
 
     return (
         configObj.allowUnattended &&
-        user.voice.channel!.members.some(
-            (fellow) =>
-                fellow.id !== user.id &&
-                !fellow.user.bot && // ignore bots thereby ignoring JamBot itself.
-                ctx.permissions[cmdName].some((role) =>
-                    userHasRole(fellow, role)
+        user.voice
+            .channel!.members.filter(
+                (fellow) => fellow.id !== user.id && !fellow.user.bot
+            )
+            .every((fellow) =>
+                ctx.permissions[cmdName].every(
+                    (role) => !userHasRole(fellow, role)
                 )
-        )
+            )
     );
 };
 

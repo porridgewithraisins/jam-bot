@@ -3,7 +3,6 @@ import {
     MessageActionRow,
     MessageActionRowOptions,
     MessageEmbed,
-    TextBasedChannels,
     TextChannel,
 } from "discord.js";
 import { configObj } from "../common/Config";
@@ -12,9 +11,9 @@ import { makeEphemeral } from "./messaging/Ephemeral.Messaging";
 import { PaginatedInteractor } from "./messaging/Pagination.Messaging";
 import * as Views from "./ViewExporter";
 
-export class Messenger {
+export class Messenger<T extends Message | TextChannel> {
     public shouldBeSilent = false;
-    constructor(private to: TextBasedChannels | Message) {}
+    constructor(public to: T) {}
 
     public send(
         embedOrEmbedsOrString: string | MessageEmbed | MessageEmbed[],

@@ -9,7 +9,7 @@ import { Song } from "./Song.Model";
 
 export class MusicPlayer {
     readonly guild: Guild;
-    readonly messenger: Messenger;
+    readonly messenger: Messenger<TextChannel>;
     readonly player = createAudioPlayer();
     readonly stashingAllowed: boolean;
     readonly onQuitCallback = () => {};
@@ -74,8 +74,6 @@ export class MusicPlayer {
                 this.permissions[cmd].push(role)
             );
         }
-
-        Object.freeze(CommandRegistry);
     }
 }
 
