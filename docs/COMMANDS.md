@@ -170,6 +170,10 @@ _Aliases_: `!l`
 
 _Aliases_: `!lq`
 
+### shuffle
+
+`!shuffle` shuffles the songs in the current queue in a random order.
+
 ### shutup
 
 `!shutup` JamBot will stop sending text messages, if you want to avoid clutter.
