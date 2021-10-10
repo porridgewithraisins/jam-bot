@@ -7,6 +7,8 @@
 **token**: Your discord bot token\
 **prefix**: A command prefix of your choice (multiple characters are fine)
 
+Example:
+
 ```js
 {
     token: "your_discord_bot_token",
@@ -17,6 +19,8 @@
 ### Spotify support
 
 You will need to create a [spotify application](SPOTIFY.md) and provide your client ID and client secret, so that JamBot can interact with the Spotify Web API.
+
+Example:
 
 ```js
 {
@@ -41,12 +45,14 @@ So as to keep configuration minimal, JamBot has its roles and permissions system
 
 **allowUnattended**: (_default: true_) Whether or not to respect the defined permissions for a command when it is used in a voice channel where none of the participants are in the permissions list for said command.
 
-Command names are recognized as present [here](COMMANDS.md#table-of-contents). Note that the commands `ping` and `help` cannot be restricted.
+Command names are recognized as present [here](COMMANDS.md#table-of-contents).
 
 Notes:
+- `lofi` command inherits permissions from `play`, you need not specify it explicitly.
+- `skipto` command inherits permissions from `skip` as well.
+- `voteskip`, `ping`, `config` and `help` cannot be restricted
 
--   `lofi` command inherits permissions from `play`, you need not specify it explicitly.
-
+Example:
 ```js
 {
     permissions: {
