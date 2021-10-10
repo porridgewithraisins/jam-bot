@@ -68,6 +68,7 @@ export class MusicPlayer {
         );
         this.permissions.lofi = this.permissions.play;
         this.permissions.voteskip = [];
+        this.permissions.skipto = this.permissions.skip;
         const perms = Object.entries(configObj.permissions || {});
         for (const [role, cmdsExclusiveToThisRole] of perms) {
             cmdsExclusiveToThisRole.forEach((cmd) =>

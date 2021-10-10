@@ -21,6 +21,7 @@ export { replay } from "./commands/Replay";
 export { restart } from "./commands/Restart";
 export { search } from "./commands/Search";
 export { showNp } from "./commands/ShowNp";
+export { shuffle } from "./commands/Shuffle";
 export { shutUp } from "./commands/ShutUp";
 export { skip } from "./commands/Skip";
 export { skipTo } from "./commands/SkipTo";

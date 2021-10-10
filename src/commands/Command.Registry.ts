@@ -108,6 +108,11 @@ export const CommandRegistry: Record<RecognizedCommands, Command> = {
         triggers: ["loopq", "lq"].map(Utils.prefixify),
         cmdTokens: 1,
     },
+    shuffle: {
+        handler: (ctx, _arg) => Commands.shuffle(ctx),
+        triggers: ["shuffle"].map(Utils.prefixify),
+        cmdTokens: 1,
+    },
     shutup: {
         handler: (ctx, _arg) => Commands.shutUp(ctx),
         triggers: ["stfu", "shutup"].map(Utils.prefixify),

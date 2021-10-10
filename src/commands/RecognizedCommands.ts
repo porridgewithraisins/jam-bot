@@ -30,6 +30,7 @@ export const MusicPlayerCommands = [
     "playnow",
     "loop",
     "loopq",
+    "shuffle",
     "shutup",
     "speakagain",
     "clean",

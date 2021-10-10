@@ -68,6 +68,14 @@ export const prependHttp = (url: string, https = true) => {
     return url.replace(/^(?!(?:\w+?:)?\/\/)/, https ? "https://" : "http://");
 };
 
+export const fischerYatesShuffle = <T>(arr: T[]) => {
+    let idx = arr.length;
+    while (idx--) {
+        const randomIdx = ~~(Math.random() * idx);
+        [arr[idx], arr[randomIdx]] = [arr[randomIdx], arr[idx]];
+    }
+};
+
 export const __FOR__TESTING__ = {
     clampAtZero,
     coerceSize,
@@ -80,4 +88,5 @@ export const __FOR__TESTING__ = {
     prependHttp,
     removeLinkMarkdown,
     removeTopicAtEnd,
+    fischerYatesShuffle,
 };
