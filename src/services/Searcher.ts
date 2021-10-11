@@ -15,9 +15,14 @@ export const keywordSearch = async (query: string): Promise<Song[]> => {
         duration: duration || "00:00:00",
         artist: author?.name,
     });
-    return (await ytsr.default(query, { pages: 1 })).items
-        .filter((item) => item.type === "video")
-        .map((item) => filterItems(item as ytsr.Video));
+    try {
+        const searchResult = await ytsr.default(query, { pages: 1 });
+        return searchResult.items
+            .filter((item) => item.type === "video")
+            .map((item) => filterItems(item as ytsr.Video));
+    } catch {
+        return [];
+    }
 };
 
 export const searchOne = async (query: string): Promise<Song[]> =>

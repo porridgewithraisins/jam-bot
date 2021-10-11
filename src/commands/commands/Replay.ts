@@ -1,4 +1,5 @@
 import { MusicPlayer } from "../../models/MusicPlayer.Model";
+
 export const replay = async (ctx: MusicPlayer) => {
     if (!ctx.lastPlayed) {
         ctx.messenger.send("Could not find last played song");

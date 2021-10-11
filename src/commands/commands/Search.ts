@@ -1,6 +1,6 @@
 import { MusicPlayer } from "../../models/MusicPlayer.Model";
 import { keywordSearch } from "../../services/Searcher";
-import { paginatedView } from "../../services/ViewExporter";
+import * as Views from "../../views/ViewExporter";
 
 export const search = async (ctx: MusicPlayer, arg: string) => {
     ctx.messenger.sendTyping();
@@ -13,6 +13,6 @@ export const search = async (ctx: MusicPlayer, arg: string) => {
     [ctx.isInSearchFlow, ctx.searchResult] = [true, searchResult];
 
     ctx.messenger.paginate(
-        paginatedView(`Search for '${arg}'`, ctx.searchResult)
+        Views.paginatedView(`Search for '${arg}'`, ctx.searchResult)
     );
 };

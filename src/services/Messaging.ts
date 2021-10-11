@@ -9,7 +9,7 @@ import { configObj } from "../common/Config";
 import * as Utils from "../common/Utils";
 import { makeEphemeral } from "./messaging/Ephemeral.Messaging";
 import { PaginatedInteractor } from "./messaging/Pagination.Messaging";
-import * as Views from "./ViewExporter";
+import * as Views from "../views/ViewExporter";
 
 export class Messenger<T extends Message | TextChannel> {
     public shouldBeSilent = false;

@@ -12,5 +12,8 @@ export const configEditor = (ctx: MusicPlayer, arg: string) => {
         Commands.invalid(ctx);
         return;
     }
-    //TODO
+    if (field === "permissions") {
+    }
 };
+
+// const permissionEditor = (ctx : MusicPlayer, role : string, )

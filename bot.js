@@ -12,5 +12,5 @@ bot.init({
         clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
     },
     autoDeleteAfter: 300,
-    idleTimeout: 15,
+    idleTimeout: 300,
 });

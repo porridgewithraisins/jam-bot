@@ -2,7 +2,9 @@ const { voiceValidator } =
     require("../../bin/validators/Voice.Validator").__FOR__TESTING;
 
 describe("Tests for the voice validator", () => {
-    let flag = jest.fn();
+    jest.useFakeTimers();
+    let deleteMock = jest.fn(async () => {});
+    let replyMock = jest.fn(async () => ({ delete: deleteMock }));
     const mocks = {
         notInAVC: [
             {
@@ -11,7 +13,7 @@ describe("Tests for the voice validator", () => {
                         channel: undefined,
                     },
                 },
-                reply: flag,
+                reply: replyMock,
             },
             {
                 member: {
@@ -19,7 +21,7 @@ describe("Tests for the voice validator", () => {
                         channel: null,
                     },
                 },
-                reply: flag,
+                reply: replyMock,
             },
         ],
         stageChannel: [
@@ -31,7 +33,7 @@ describe("Tests for the voice validator", () => {
                         },
                     },
                 },
-                reply: flag,
+                reply: replyMock,
             },
             {
                 member: {
@@ -41,7 +43,7 @@ describe("Tests for the voice validator", () => {
                         },
                     },
                 },
-                reply: flag,
+                reply: replyMock,
             },
         ],
         DM: {
@@ -54,12 +56,12 @@ describe("Tests for the voice validator", () => {
             channel: {
                 type: "DM",
             },
-            reply: flag,
+            reply: replyMock,
         },
     };
 
-    beforeEach(() => flag.mockClear());
-
+    beforeEach(() => replyMock.mockClear());
+    afterEach(() => jest.runAllTimers());
     it("should NOT validate if user is not in a voice channel", () => {
         mocks.notInAVC.forEach((mock) =>
             expect(voiceValidator(mock)).toBeFalsy()
@@ -68,7 +70,11 @@ describe("Tests for the voice validator", () => {
 
     it("should reply to the message if user is not in a voice channel", () => {
         mocks.notInAVC.forEach(voiceValidator);
-        expect(flag).toHaveBeenCalledTimes(2);
+        expect(replyMock).toHaveBeenCalledTimes(2);
+    });
+
+    it("should delete the reply after a timeout", async () => {
+        expect((await replyMock()).delete).toHaveBeenCalled();
     });
 
     it("should NOT validate if user is in a stage channel", () => {

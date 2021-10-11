@@ -81,5 +81,5 @@ export class MusicPlayer {
 export interface MusicPlayerArgs {
     text: TextChannel;
     voice: VoiceChannel;
-    onQuit: () => {};
+    onQuit: () => any;
 }

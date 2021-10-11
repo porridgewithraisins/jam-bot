@@ -19,7 +19,7 @@ const musicPlayerFactory = (message: Message) =>
     new MusicPlayer({
         text: message.channel as TextChannel,
         voice: message.member!.voice.channel as VoiceChannel,
-        onQuit: () => musicPlayers.delete(message.guild!.id),
+        onQuit: () => destroyMusicPlayer(message.guild!.id),
     });
 
 export const destroyMusicPlayer = (guildId: string) => {

@@ -3,7 +3,7 @@ import { MusicPlayer } from "../../models/MusicPlayer.Model";
 import { Song } from "../../models/Song.Model";
 import { kickstartPlayer } from "../../services/AudioPlayer";
 import { fetchSong } from "../../services/Fetcher";
-import { songView } from "../../services/ViewExporter";
+import * as Views from "../../views/ViewExporter";
 
 export const play = async (ctx: MusicPlayer, arg: string) => {
     if (!arg) {
@@ -44,7 +44,7 @@ export const play = async (ctx: MusicPlayer, arg: string) => {
     if (ctx.player.state.status !== AudioPlayerStatus.Idle) {
         if (newSongs.length > 1)
             ctx.messenger.send(`Added ${newSongs.length} songs to the queue`);
-        else ctx.messenger.send(songView(newSongs[0]));
+        else ctx.messenger.send(Views.songView(newSongs[0]));
     }
 
     if (ctx.shouldKickStart) kickstartPlayer(ctx);

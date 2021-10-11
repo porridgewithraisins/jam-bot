@@ -62,17 +62,22 @@ require("jambot").init({
 
 This is all that is required for a basic configuration. You can configure Spotify support, customize Roles and Permissions, and more, as instructed in [CONFIG.md](docs/CONFIG.md)
 
-Now run this file with the following command.
+Now start the bot with the following command.
 
+If you're on macOS or Linux:
 ```bash
-node bot.js
+npm start
 ```
 
-and confirm that a 'ready' message shows up in your terminal.
+If you're on Windows:
+```powershell
+npm start:win
+```
+and confirm that you are greeted by a logo of the bot followed by an indication that the bot logged in successfully.
 
-Head over to your discord server, and in a text channel, check the latency of the bot with the `ping` command. You can see all of the commands [here](docs/COMMANDS.md).
+Head over to your discord server, and in a text channel, check the latency of the bot with the `ping` command. You can see the rest of the commands [here](docs/COMMANDS.md).
 
-If you wish to, you can employ the same instance of the bot across multiple servers, or multiple instances of the bot on the same server - they won't interfere with each other. However, this will depend on your computer's resources, so you may want to [enable performance logging](docs/CONFIG.md#extra-configuration).
+If you wish to, you can employ the same instance of the bot across multiple servers, or multiple instances of the bot on the same server - they won't interfere with each other. However, the latter will depend on your computer's resources, so you may want to [enable performance logging](docs/CONFIG.md#extra-configuration).
 
 ## Development
 
