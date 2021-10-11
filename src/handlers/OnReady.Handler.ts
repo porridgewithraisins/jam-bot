@@ -5,7 +5,6 @@ export const onReady = async (client: Client) => {
         `JamBot [@${client.user?.tag ?? "deleted_user"}] is ready to jam!`
     );
     try {
-        console.log("Setting avatar...");
         await client.user?.setAvatar("assets/jambot.png");
     } catch {
         console.log("Minor: Failed to set avatar");
